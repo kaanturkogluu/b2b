@@ -78,7 +78,11 @@ return [
     |
     */
 
+<<<<<<< HEAD
     'locale' => env('APP_LOCALE', 'en'),
+=======
+    'locale' => env('APP_LOCALE', 'tr'),
+>>>>>>> 7f6167b (Temel)
 
     'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
 

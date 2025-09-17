@@ -12,6 +12,12 @@ class User extends Authenticatable
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
+<<<<<<< HEAD
+=======
+    const ROLE_ADMIN = 'admin';
+    const ROLE_STAFF = 'personel';
+
+>>>>>>> 7f6167b (Temel)
     /**
      * The attributes that are mass assignable.
      *
@@ -19,8 +25,15 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+<<<<<<< HEAD
         'email',
         'password',
+=======
+        'username',
+        'email',
+        'password',
+        'role',
+>>>>>>> 7f6167b (Temel)
     ];
 
     /**
@@ -45,4 +58,34 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+<<<<<<< HEAD
+=======
+
+    /**
+     * Check if user is admin
+     */
+    public function isAdmin(): bool
+    {
+        return $this->role === self::ROLE_ADMIN;
+    }
+
+    /**
+     * Check if user is staff
+     */
+    public function isStaff(): bool
+    {
+        return $this->role === self::ROLE_STAFF;
+    }
+
+    /**
+     * Get all available roles
+     */
+    public static function getRoles(): array
+    {
+        return [
+            self::ROLE_ADMIN => 'Admin',
+            self::ROLE_STAFF => 'Personel',
+        ];
+    }
+>>>>>>> 7f6167b (Temel)
 }
