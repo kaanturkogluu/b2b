@@ -27,6 +27,7 @@ Route::middleware(['web', 'auth'])->group(function () {
         // Service Management Routes
         Route::resource('bakim', \App\Http\Controllers\BakimController::class);
         Route::get('/bakim/{bakim}/print', [\App\Http\Controllers\BakimController::class, 'print'])->name('bakim.print');
+        Route::get('/bakim/export/excel', [\App\Http\Controllers\BakimController::class, 'exportExcel'])->name('bakim.export.excel');
         
         // Invoice Settings Routes
         Route::get('/invoice-settings', [\App\Http\Controllers\InvoiceSettingsController::class, 'index'])->name('invoice-settings.index');
@@ -41,6 +42,12 @@ Route::middleware(['web', 'auth'])->group(function () {
     
     // Staff Routes
     Route::middleware(['role:staff'])->group(function () {
+        Route::get('/staff/dashboard', [\App\Http\Controllers\StaffController::class, 'dashboard'])->name('staff.dashboard');
         Route::get('/staff/bakim', [\App\Http\Controllers\BakimController::class, 'staffIndex'])->name('staff.bakim.index');
+        Route::get('/staff/bakim/{bakim}', [\App\Http\Controllers\BakimController::class, 'staffShow'])->name('staff.bakim.show');
+        Route::post('/staff/bakim/{bakim}/complete', [\App\Http\Controllers\StaffController::class, 'completeMaintenance'])->name('staff.bakim.complete');
+        Route::get('/staff/profile', [\App\Http\Controllers\StaffController::class, 'profile'])->name('staff.profile');
+        Route::get('/staff/tasks', [\App\Http\Controllers\StaffController::class, 'tasks'])->name('staff.tasks');
+        Route::get('/staff/timeline', [\App\Http\Controllers\StaffController::class, 'timeline'])->name('staff.timeline');
     });
 });

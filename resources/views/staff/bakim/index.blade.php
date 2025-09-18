@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Servislerim - MotoJet Servis</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -93,25 +94,13 @@
                         MotoJet Servis
                     </h4>
                     <nav class="nav flex-column">
-                        <a class="nav-link" href="{{ route('dashboard') }}">
+                        <a class="nav-link" href="{{ route('staff.dashboard') }}">
                             <i class="fas fa-tachometer-alt me-2"></i>
-                            Dashboard
-                        </a>
-                        <a class="nav-link" href="#">
-                            <i class="fas fa-tasks me-2"></i>
-                            Görevlerim
+                            Ana Sayfa
                         </a>
                         <a class="nav-link active" href="{{ route('staff.bakim.index') }}">
                             <i class="fas fa-cogs me-2"></i>
-                            Servisler
-                        </a>
-                        <a class="nav-link" href="#">
-                            <i class="fas fa-clock me-2"></i>
-                            Zaman Çizelgesi
-                        </a>
-                        <a class="nav-link" href="#">
-                            <i class="fas fa-user me-2"></i>
-                            Profilim
+                            Bakım Listesi
                         </a>
                     </nav>
                 </div>
@@ -159,38 +148,104 @@
                         <div class="card-header">
                             <h5 class="mb-0">
                                 <i class="fas fa-cogs me-2"></i>
-                                Sorumlu Olduğum Servisler
+                                Tüm Servisler
                             </h5>
                         </div>
                         <div class="card-body">
-                            <!-- Search and Filter -->
-                            <div class="row mb-4">
-                                <div class="col-md-6">
-                                    <form method="GET" action="{{ route('staff.bakim.index') }}" class="d-flex">
-                                        <input type="text" 
-                                               name="search" 
-                                               class="form-control me-2" 
-                                               placeholder="Plaka, müşteri adı ara..." 
-                                               value="{{ request('search') }}">
-                                        <button type="submit" class="btn btn-outline-primary">
-                                            <i class="fas fa-search"></i>
+                            <!-- Advanced Search and Filter -->
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-filter me-2"></i>
+                                        Filtreleme
+                                        <button class="btn btn-sm btn-outline-primary float-end" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse">
+                                            <i class="fas fa-chevron-down"></i>
                                         </button>
-                                    </form>
+                                    </h6>
                                 </div>
-                                <div class="col-md-3">
-                                    <form method="GET" action="{{ route('staff.bakim.index') }}">
-                                        <select name="bakim_durumu" class="form-select" onchange="this.form.submit()">
-                                            <option value="">Tüm Durumlar</option>
-                                            <option value="Devam Ediyor" {{ request('bakim_durumu') == 'Devam Ediyor' ? 'selected' : '' }}>Devam Ediyor</option>
-                                            <option value="Tamamlandı" {{ request('bakim_durumu') == 'Tamamlandı' ? 'selected' : '' }}>Tamamlandı</option>
-                                        </select>
-                                    </form>
-                                </div>
-                                <div class="col-md-3 text-end">
-                                    <a href="{{ route('staff.bakim.index') }}" class="btn btn-outline-secondary">
-                                        <i class="fas fa-refresh me-2"></i>
-                                        Temizle
-                                    </a>
+                                <div class="collapse" id="filterCollapse">
+                                    <div class="card-body">
+                                        <form method="GET" action="{{ route('staff.bakim.index') }}" id="filterForm">
+                                            <div class="row g-3">
+                                                <!-- Arama -->
+                                                <div class="col-md-4">
+                                                    <label class="form-label">Arama</label>
+                                                    <input type="text" 
+                                                           name="search" 
+                                                           class="form-control" 
+                                                           placeholder="Plaka, müşteri, telefon, şase..." 
+                                                           value="{{ request('search') }}">
+                                                </div>
+                                                
+                                                <!-- Bakım Durumu -->
+                                                <div class="col-md-2">
+                                                    <label class="form-label">Bakım Durumu</label>
+                                                    <select name="bakim_durumu" class="form-select">
+                                                        @foreach($filterOptions['bakim_durumu_options'] as $value => $label)
+                                                            <option value="{{ $value }}" {{ request('bakim_durumu') == $value ? 'selected' : '' }}>
+                                                                {{ $label }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                
+                                                <!-- Ödeme Durumu -->
+                                                <div class="col-md-2">
+                                                    <label class="form-label">Ödeme Durumu</label>
+                                                    <select name="odeme_durumu" class="form-select">
+                                                        @foreach($filterOptions['odeme_durumu_options'] as $value => $label)
+                                                            <option value="{{ $value }}" {{ request('odeme_durumu') == $value ? 'selected' : '' }}>
+                                                                {{ $label }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                
+                                                <!-- Sıralama -->
+                                                <div class="col-md-2">
+                                                    <label class="form-label">Sıralama</label>
+                                                    <select name="sort_by" class="form-select">
+                                                        @foreach($filterOptions['sort_options'] as $value => $label)
+                                                            <option value="{{ $value }}" {{ request('sort_by') == $value ? 'selected' : '' }}>
+                                                                {{ $label }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                
+                                                <!-- Tarih Aralığı -->
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Başlangıç Tarihi</label>
+                                                    <input type="date" 
+                                                           name="start_date" 
+                                                           class="form-control" 
+                                                           value="{{ request('start_date') }}">
+                                                </div>
+                                                
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Bitiş Tarihi</label>
+                                                    <input type="date" 
+                                                           name="end_date" 
+                                                           class="form-control" 
+                                                           value="{{ request('end_date') }}">
+                                                </div>
+                                                
+                                                <!-- Butonlar -->
+                                                <div class="col-12">
+                                                    <div class="d-flex gap-2">
+                                                        <button type="submit" class="btn btn-primary">
+                                                            <i class="fas fa-search me-2"></i>
+                                                            Filtrele
+                                                        </button>
+                                                        <a href="{{ route('staff.bakim.index') }}" class="btn btn-outline-secondary">
+                                                            <i class="fas fa-refresh me-2"></i>
+                                                            Temizle
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
                                 </div>
                             </div>
 
@@ -204,6 +259,7 @@
                                             <th>Müşteri</th>
                                             <th>Telefon</th>
                                             <th>Bakım Durumu</th>
+                                            <th>Onaylayan Personel</th>
                                             <th>Ödeme Durumu</th>
                                             <th>Ücret</th>
                                             <th>Bakım Tarihi</th>
@@ -229,6 +285,13 @@
                                                     @endif
                                                 </td>
                                                 <td>
+                                                    @if($bakim->tamamlayanPersonel)
+                                                        <span class="badge bg-success">{{ $bakim->tamamlayanPersonel->name }}</span>
+                                                    @else
+                                                        <span class="badge bg-secondary">Onaylanmadı</span>
+                                                    @endif
+                                                </td>
+                                                <td>
                                                     @if($bakim->odeme_durumu == 0)
                                                         <span class="badge badge-odeme-bekliyor">Ödeme Bekliyor</span>
                                                     @else
@@ -241,22 +304,28 @@
                                                 <td>{{ $bakim->bakim_tarihi->format('d.m.Y') }}</td>
                                                 <td>
                                                     <div class="btn-group" role="group">
-                                                        <a href="{{ route('bakim.show', $bakim) }}" 
+                                                        <a href="{{ route('staff.bakim.show', $bakim) }}" 
                                                            class="btn btn-sm btn-outline-info" 
                                                            title="Görüntüle">
                                                             <i class="fas fa-eye"></i>
                                                         </a>
-                                                        <a href="{{ route('bakim.edit', $bakim) }}" 
-                                                           class="btn btn-sm btn-outline-warning" 
-                                                           title="Düzenle">
-                                                            <i class="fas fa-edit"></i>
-                                                        </a>
+                                                        @if($bakim->bakim_durumu == 'Devam Ediyor')
+                                                            <button type="button" 
+                                                                    class="btn btn-sm btn-success" 
+                                                                    data-bs-toggle="modal" 
+                                                                    data-bs-target="#completeModal{{ $bakim->id }}"
+                                                                    title="Bakımı Onayla">
+                                                                <i class="fas fa-check"></i>
+                                                            </button>
+                                                        @else
+                                                            <span class="badge bg-success">Onaylandı</span>
+                                                        @endif
                                                     </div>
                                                 </td>
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="9" class="text-center py-4">
+                                                <td colspan="10" class="text-center py-4">
                                                     <div class="text-muted">
                                                         <i class="fas fa-cogs fa-3x mb-3"></i>
                                                         <p>Henüz size atanmış servis bulunmuyor.</p>
@@ -281,6 +350,74 @@
         </div>
     </div>
 
+    <!-- Complete Maintenance Modals -->
+    @foreach($bakimlar as $bakim)
+        @if($bakim->bakim_durumu == 'Devam Ediyor')
+            <div class="modal fade" id="completeModal{{ $bakim->id }}" tabindex="-1" aria-labelledby="completeModalLabel{{ $bakim->id }}" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="completeModalLabel{{ $bakim->id }}">
+                                <i class="fas fa-check-circle me-2"></i>
+                                Bakımı Onayla
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form action="{{ route('staff.bakim.complete', $bakim) }}" method="POST">
+                            @csrf
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <h6>Bakım Bilgileri</h6>
+                                    <p><strong>Plaka:</strong> {{ $bakim->plaka }}</p>
+                                    <p><strong>Müşteri:</strong> {{ $bakim->musteri_adi }}</p>
+                                    <p><strong>Bakım Tarihi:</strong> {{ $bakim->bakim_tarihi->format('d.m.Y H:i') }}</p>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="tamamlanma_notu{{ $bakim->id }}" class="form-label">
+                                        <i class="fas fa-sticky-note me-1"></i>
+                                        Onay Notu (Opsiyonel)
+                                    </label>
+                                    <textarea class="form-control" 
+                                              id="tamamlanma_notu{{ $bakim->id }}" 
+                                              name="tamamlanma_notu" 
+                                              rows="3" 
+                                              placeholder="Bakım onayı ile ilgili notlarınızı buraya yazabilirsiniz..."></textarea>
+                                </div>
+                                
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <strong>Dikkat:</strong> Bu işlem geri alınamaz. Bakım onaylandı olarak işaretlenecektir.
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                    <i class="fas fa-times me-1"></i>
+                                    İptal
+                                </button>
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-check me-1"></i>
+                                    Bakımı Onayla
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        @endif
+    @endforeach
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Auto-submit form on select change
+        document.addEventListener('DOMContentLoaded', function() {
+            const selects = document.querySelectorAll('select[name="bakim_durumu"], select[name="odeme_durumu"], select[name="sort_by"]');
+            selects.forEach(select => {
+                select.addEventListener('change', function() {
+                    this.form.submit();
+                });
+            });
+        });
+    </script>
 </body>
 </html>

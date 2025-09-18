@@ -22,12 +22,16 @@ class Bakim extends Model
         'genel_aciklama',
         'admin_id',
         'bakim_tarihi',
-        'personel_id'
+        'personel_id',
+        'tamamlayan_personel_id',
+        'tamamlanma_tarihi',
+        'tamamlanma_notu'
     ];
 
     protected $casts = [
         'tahmini_teslim_tarihi' => 'datetime',
         'bakim_tarihi' => 'datetime',
+        'tamamlanma_tarihi' => 'datetime',
         'odeme_durumu' => 'integer',
         'ucret' => 'decimal:2'
     ];
@@ -40,6 +44,11 @@ class Bakim extends Model
     public function personel(): BelongsTo
     {
         return $this->belongsTo(User::class, 'personel_id');
+    }
+
+    public function tamamlayanPersonel(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'tamamlayan_personel_id');
     }
 
     public function degisecekParcalar(): HasMany

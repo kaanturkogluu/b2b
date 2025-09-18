@@ -183,27 +183,34 @@
                                 </div>
                                 <div class="card-body">
                                     <div class="list-group list-group-flush">
-                                        <div class="list-group-item d-flex justify-content-between align-items-center">
-                                            <div>
-                                                <h6 class="mb-1">Yeni servis kaydı eklendi</h6>
-                                                <small class="text-muted">Honda CBR 600 - 2 saat önce</small>
+                                        @forelse($recentActivities as $activity)
+                                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <h6 class="mb-1">{{ $activity->description }}</h6>
+                                                    <small class="text-muted">
+                                                        {{ $activity->user->name ?? 'Sistem' }} - 
+                                                        {{ $activity->created_at->diffForHumans() }}
+                                                    </small>
+                                                </div>
+                                                <span class="badge 
+                                                    @if($activity->type == 'bakim_created') bg-primary
+                                                    @elseif($activity->type == 'bakim_completed') bg-success
+                                                    @elseif($activity->type == 'user_created') bg-info
+                                                    @else bg-secondary
+                                                    @endif">
+                                                    @if($activity->type == 'bakim_created') Yeni Servis
+                                                    @elseif($activity->type == 'bakim_completed') Tamamlandı
+                                                    @elseif($activity->type == 'user_created') Kullanıcı
+                                                    @else Aktivite
+                                                    @endif
+                                                </span>
                                             </div>
-                                            <span class="badge bg-primary">Yeni</span>
-                                        </div>
-                                        <div class="list-group-item d-flex justify-content-between align-items-center">
-                                            <div>
-                                                <h6 class="mb-1">Servis tamamlandı</h6>
-                                                <small class="text-muted">Yamaha R1 - 4 saat önce</small>
+                                        @empty
+                                            <div class="text-center py-4">
+                                                <i class="fas fa-history fa-3x text-muted mb-3"></i>
+                                                <p class="text-muted">Henüz aktivite bulunmuyor.</p>
                                             </div>
-                                            <span class="badge bg-success">Tamamlandı</span>
-                                        </div>
-                                        <div class="list-group-item d-flex justify-content-between align-items-center">
-                                            <div>
-                                                <h6 class="mb-1">Yeni kullanıcı kaydı</h6>
-                                                <small class="text-muted">Ahmet Yılmaz - 6 saat önce</small>
-                                            </div>
-                                            <span class="badge bg-info">Kullanıcı</span>
-                                        </div>
+                                        @endforelse
                                     </div>
                                 </div>
                             </div>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\ActivityLog;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 
@@ -72,13 +73,27 @@ class UserController extends Controller
             'role.in' => 'Geçersiz rol seçimi.',
         ]);
 
-        User::create([
+        $user = User::create([
             'name' => $request->name,
             'username' => $request->username,
             'email' => $request->filled('email') ? $request->email : null,
             'password' => Hash::make($request->password),
             'role' => $request->role,
         ]);
+
+        // Activity log
+        ActivityLog::log(
+            'user_created',
+            "Yeni kullanıcı oluşturuldu: {$user->name} ({$user->role})",
+            Auth::id(),
+            $user->id,
+            'App\Models\User',
+            [
+                'name' => $user->name,
+                'username' => $user->username,
+                'role' => $user->role
+            ]
+        );
 
         return redirect()->route('users.index')
             ->with('success', 'Kullanıcı başarıyla oluşturuldu.');

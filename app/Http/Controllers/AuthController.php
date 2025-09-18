@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use App\Models\ActivityLog;
 
 class AuthController extends Controller
 {
@@ -71,7 +72,13 @@ class AuthController extends Controller
         $user = Auth::user();
         
         if ($user->isAdmin()) {
-            return view('admin.dashboard', compact('user'));
+            // Son aktiviteleri getir
+            $recentActivities = ActivityLog::with('user')
+                ->orderBy('created_at', 'desc')
+                ->limit(10)
+                ->get();
+            
+            return view('admin.dashboard', compact('user', 'recentActivities'));
         } elseif ($user->isStaff()) {
             return view('staff.dashboard', compact('user'));
         }

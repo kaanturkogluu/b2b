@@ -214,12 +214,26 @@
                                     </div>
 
                                     @if($bakim->genel_aciklama)
-                                        <div class="info-card p-3">
+                                        <div class="info-card p-3 mb-3">
                                             <h6 class="text-primary mb-2">
                                                 <i class="fas fa-comment me-2"></i>
                                                 Genel Açıklama
                                             </h6>
                                             <p class="mb-0">{{ $bakim->genel_aciklama }}</p>
+                                        </div>
+                                    @endif
+
+                                    @if($bakim->tamamlanma_notu)
+                                        <div class="info-card p-3">
+                                            <h6 class="text-success mb-2">
+                                                <i class="fas fa-sticky-note me-2"></i>
+                                                Bakım Onay Notu
+                                            </h6>
+                                            <p class="mb-1"><strong>Onaylayan:</strong> {{ $bakim->tamamlayanPersonel->name ?? 'Belirtilmemiş' }}</p>
+                                            @if($bakim->tamamlanma_tarihi)
+                                                <p class="mb-2"><strong>Onay Tarihi:</strong> {{ $bakim->tamamlanma_tarihi->format('d.m.Y H:i') }}</p>
+                                            @endif
+                                            <p class="mb-0">{{ $bakim->tamamlanma_notu }}</p>
                                         </div>
                                     @endif
                                 </div>
