@@ -26,7 +26,7 @@ class RoleMiddleware
             abort(403, 'Bu sayfaya erişim yetkiniz yok.');
         }
         
-        if ($role === 'personel' && !$user->isStaff()) {
+        if ($role === 'staff' && !$user->isStaff()) {
             abort(403, 'Bu sayfaya erişim yetkiniz yok.');
         }
 

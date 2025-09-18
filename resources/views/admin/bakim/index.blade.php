@@ -178,43 +178,136 @@
                             </a>
                         </div>
                         <div class="card-body">
-                            <!-- Search and Filter -->
-                            <div class="row mb-4">
-                                <div class="col-md-4">
-                                    <form method="GET" action="{{ route('bakim.index') }}" class="d-flex">
-                                        <input type="text" 
-                                               name="search" 
-                                               class="form-control me-2" 
-                                               placeholder="Plaka, müşteri adı ara..." 
-                                               value="{{ request('search') }}">
-                                        <button type="submit" class="btn btn-outline-primary">
-                                            <i class="fas fa-search"></i>
+                            <!-- Advanced Search and Filter -->
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-filter me-2"></i>
+                                        Gelişmiş Filtreleme
+                                        <button class="btn btn-sm btn-outline-primary float-end" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse">
+                                            <i class="fas fa-chevron-down"></i>
                                         </button>
-                                    </form>
+                                    </h6>
                                 </div>
-                                <div class="col-md-3">
-                                    <form method="GET" action="{{ route('bakim.index') }}">
-                                        <select name="bakim_durumu" class="form-select" onchange="this.form.submit()">
-                                            <option value="">Tüm Durumlar</option>
-                                            <option value="Devam Ediyor" {{ request('bakim_durumu') == 'Devam Ediyor' ? 'selected' : '' }}>Devam Ediyor</option>
-                                            <option value="Tamamlandı" {{ request('bakim_durumu') == 'Tamamlandı' ? 'selected' : '' }}>Tamamlandı</option>
-                                        </select>
-                                    </form>
-                                </div>
-                                <div class="col-md-3">
-                                    <form method="GET" action="{{ route('bakim.index') }}">
-                                        <select name="odeme_durumu" class="form-select" onchange="this.form.submit()">
-                                            <option value="">Tüm Ödeme Durumları</option>
-                                            <option value="0" {{ request('odeme_durumu') == '0' ? 'selected' : '' }}>Ödeme Bekliyor</option>
-                                            <option value="1" {{ request('odeme_durumu') == '1' ? 'selected' : '' }}>Ödeme Alındı</option>
-                                        </select>
-                                    </form>
-                                </div>
-                                <div class="col-md-2 text-end">
-                                    <a href="{{ route('bakim.index') }}" class="btn btn-outline-secondary">
-                                        <i class="fas fa-refresh me-2"></i>
-                                        Temizle
-                                    </a>
+                                <div class="collapse" id="filterCollapse">
+                                    <div class="card-body">
+                                        <form method="GET" action="{{ route('bakim.index') }}" id="filterForm">
+                                            <div class="row g-3">
+                                                <!-- Arama -->
+                                                <div class="col-md-4">
+                                                    <label class="form-label">Arama</label>
+                                                    <input type="text" 
+                                                           name="search" 
+                                                           class="form-control" 
+                                                           placeholder="Plaka, müşteri, telefon, şase..." 
+                                                           value="{{ request('search') }}">
+                                                </div>
+                                                
+                                                <!-- Bakım Durumu -->
+                                                <div class="col-md-2">
+                                                    <label class="form-label">Bakım Durumu</label>
+                                                    <select name="bakim_durumu" class="form-select">
+                                                        @foreach($filterOptions['bakim_durumu_options'] as $value => $label)
+                                                            <option value="{{ $value }}" {{ request('bakim_durumu') == $value ? 'selected' : '' }}>
+                                                                {{ $label }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                
+                                                <!-- Ödeme Durumu -->
+                                                <div class="col-md-2">
+                                                    <label class="form-label">Ödeme Durumu</label>
+                                                    <select name="odeme_durumu" class="form-select">
+                                                        @foreach($filterOptions['odeme_durumu_options'] as $value => $label)
+                                                            <option value="{{ $value }}" {{ request('odeme_durumu') == $value ? 'selected' : '' }}>
+                                                                {{ $label }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                
+                                                <!-- Personel -->
+                                                <div class="col-md-2">
+                                                    <label class="form-label">Personel</label>
+                                                    <select name="personel_id" class="form-select">
+                                                        <option value="">Tüm Personeller</option>
+                                                        @foreach($personeller as $personel)
+                                                            <option value="{{ $personel->id }}" {{ request('personel_id') == $personel->id ? 'selected' : '' }}>
+                                                                {{ $personel->name }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                
+                                                <!-- Sıralama -->
+                                                <div class="col-md-2">
+                                                    <label class="form-label">Sıralama</label>
+                                                    <select name="sort_by" class="form-select">
+                                                        @foreach($filterOptions['sort_options'] as $value => $label)
+                                                            <option value="{{ $value }}" {{ request('sort_by') == $value ? 'selected' : '' }}>
+                                                                {{ $label }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                
+                                                <!-- Tarih Aralığı -->
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Başlangıç Tarihi</label>
+                                                    <input type="date" 
+                                                           name="start_date" 
+                                                           class="form-control" 
+                                                           value="{{ request('start_date') }}">
+                                                </div>
+                                                
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Bitiş Tarihi</label>
+                                                    <input type="date" 
+                                                           name="end_date" 
+                                                           class="form-control" 
+                                                           value="{{ request('end_date') }}">
+                                                </div>
+                                                
+                                                <!-- Ücret Aralığı -->
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Min. Ücret (₺)</label>
+                                                    <input type="number" 
+                                                           name="min_ucret" 
+                                                           class="form-control" 
+                                                           placeholder="0" 
+                                                           value="{{ request('min_ucret') }}">
+                                                </div>
+                                                
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Max. Ücret (₺)</label>
+                                                    <input type="number" 
+                                                           name="max_ucret" 
+                                                           class="form-control" 
+                                                           placeholder="999999" 
+                                                           value="{{ request('max_ucret') }}">
+                                                </div>
+                                                
+                                                <!-- Butonlar -->
+                                                <div class="col-12">
+                                                    <div class="d-flex gap-2">
+                                                        <button type="submit" class="btn btn-primary">
+                                                            <i class="fas fa-search me-2"></i>
+                                                            Filtrele
+                                                        </button>
+                                                        <a href="{{ route('bakim.index') }}" class="btn btn-outline-secondary">
+                                                            <i class="fas fa-refresh me-2"></i>
+                                                            Temizle
+                                                        </a>
+                                                        <button type="button" class="btn btn-outline-info" onclick="exportToExcel()">
+                                                            <i class="fas fa-file-excel me-2"></i>
+                                                            Excel'e Aktar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
                                 </div>
                             </div>
 
@@ -231,6 +324,7 @@
                                             <th>Ödeme Durumu</th>
                                             <th>Ücret</th>
                                             <th>Personel</th>
+                                            <th>Bakım Notu</th>
                                             <th>Bakım Tarihi</th>
                                             <th>İşlemler</th>
                                         </tr>
@@ -264,6 +358,19 @@
                                                     <strong>{{ number_format($bakim->ucret, 2) }} ₺</strong>
                                                 </td>
                                                 <td>{{ $bakim->personel->name ?? '-' }}</td>
+                                                <td>
+                                                    @if($bakim->tamamlanma_notu)
+                                                        <span class="badge bg-info" 
+                                                              data-bs-toggle="tooltip" 
+                                                              data-bs-placement="top" 
+                                                              title="{{ $bakim->tamamlanma_notu }}">
+                                                            <i class="fas fa-sticky-note me-1"></i>
+                                                            Not Var
+                                                        </span>
+                                                    @else
+                                                        <span class="text-muted">-</span>
+                                                    @endif
+                                                </td>
                                                 <td>{{ $bakim->bakim_tarihi->format('d.m.Y') }}</td>
                                                 <td>
                                                     <div class="btn-group" role="group">
@@ -294,7 +401,7 @@
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="10" class="text-center py-4">
+                                                <td colspan="11" class="text-center py-4">
                                                     <div class="text-muted">
                                                         <i class="fas fa-cogs fa-3x mb-3"></i>
                                                         <p>Henüz servis kaydı bulunmuyor.</p>
@@ -324,5 +431,58 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+        
+        // Export to Excel function
+        function exportToExcel() {
+            const form = document.getElementById('filterForm');
+            const formData = new FormData(form);
+            const params = new URLSearchParams(formData);
+            
+            window.open('{{ route("bakim.export.excel") }}?' + params.toString(), '_blank');
+        }
+        
+        // Auto-submit form on select change
+        document.addEventListener('DOMContentLoaded', function() {
+            const selects = document.querySelectorAll('select[name="bakim_durumu"], select[name="odeme_durumu"], select[name="personel_id"], select[name="sort_by"]');
+            selects.forEach(select => {
+                select.addEventListener('change', function() {
+                    this.form.submit();
+                });
+            });
+            
+            // Lazy loading for images
+            const images = document.querySelectorAll('img[data-src]');
+            const imageObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        img.src = img.dataset.src;
+                        img.classList.remove('lazy');
+                        imageObserver.unobserve(img);
+                    }
+                });
+            });
+            
+            images.forEach(img => imageObserver.observe(img));
+            
+            // Debounced search
+            let searchTimeout;
+            const searchInput = document.querySelector('input[name="search"]');
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(() => {
+                        this.form.submit();
+                    }, 500);
+                });
+            }
+        });
+    </script>
 </body>
 </html>

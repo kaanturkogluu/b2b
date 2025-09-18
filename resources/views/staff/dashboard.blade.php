@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Personel Paneli - MotoJet Servis</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -89,25 +90,13 @@
                         MotoJet Servis
                     </h4>
                     <nav class="nav flex-column">
-                        <a class="nav-link active" href="#">
+                        <a class="nav-link active" href="{{ route('staff.dashboard') }}">
                             <i class="fas fa-tachometer-alt me-2"></i>
-                            Dashboard
-                        </a>
-                        <a class="nav-link" href="#">
-                            <i class="fas fa-tasks me-2"></i>
-                            Görevlerim
+                            Ana Sayfa
                         </a>
                         <a class="nav-link" href="{{ route('staff.bakim.index') }}">
                             <i class="fas fa-cogs me-2"></i>
-                            Servisler
-                        </a>
-                        <a class="nav-link" href="#">
-                            <i class="fas fa-clock me-2"></i>
-                            Zaman Çizelgesi
-                        </a>
-                        <a class="nav-link" href="#">
-                            <i class="fas fa-user me-2"></i>
-                            Profilim
+                            Bakım Listesi
                         </a>
                     </nav>
                 </div>
@@ -134,160 +123,35 @@
                         </div>
                     </div>
 
-                    <!-- Stats Cards -->
-                    <div class="row mb-4">
-                        <div class="col-md-3 mb-3">
-                            <div class="card stat-card">
-                                <div class="card-body text-center">
-                                    <i class="fas fa-tasks fa-2x mb-3"></i>
-                                    <div class="stat-number">5</div>
-                                    <div>Aktif Görevler</div>
-                                </div>
-                            </div>
+                    <!-- Flash Messages -->
+                    @if(session('success'))
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle me-2"></i>
+                            {{ session('success') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
-                        <div class="col-md-3 mb-3">
-                            <div class="card stat-card">
-                                <div class="card-body text-center">
-                                    <i class="fas fa-check-circle fa-2x mb-3"></i>
-                                    <div class="stat-number">23</div>
-                                    <div>Tamamlanan Görevler</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <div class="card stat-card">
-                                <div class="card-body text-center">
-                                    <i class="fas fa-clock fa-2x mb-3"></i>
-                                    <div class="stat-number">8.5</div>
-                                    <div>Çalışma Saati</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <div class="card stat-card">
-                                <div class="card-body text-center">
-                                    <i class="fas fa-star fa-2x mb-3"></i>
-                                    <div class="stat-number">4.8</div>
-                                    <div>Performans Puanı</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    @endif
 
-                    <!-- Tasks and Activities -->
-                    <div class="row">
-                        <div class="col-md-8">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5 class="mb-0">
-                                        <i class="fas fa-tasks me-2"></i>
-                                        Günlük Görevlerim
-                                    </h5>
-                                </div>
-                                <div class="card-body">
-                                    <div class="task-item priority-high">
-                                        <div class="d-flex justify-content-between align-items-start">
-                                            <div>
-                                                <h6 class="mb-1">Honda CBR 600 - Motor Bakımı</h6>
-                                                <p class="text-muted mb-1">Müşteri: Mehmet Yılmaz</p>
-                                                <small class="text-muted">Saat: 14:00 - 16:00</small>
-                                            </div>
-                                            <span class="badge bg-danger">Yüksek Öncelik</span>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="task-item priority-medium">
-                                        <div class="d-flex justify-content-between align-items-start">
-                                            <div>
-                                                <h6 class="mb-1">Yamaha R1 - Fren Sistemi Kontrolü</h6>
-                                                <p class="text-muted mb-1">Müşteri: Ayşe Demir</p>
-                                                <small class="text-muted">Saat: 16:30 - 17:30</small>
-                                            </div>
-                                            <span class="badge bg-warning">Orta Öncelik</span>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="task-item priority-low">
-                                        <div class="d-flex justify-content-between align-items-start">
-                                            <div>
-                                                <h6 class="mb-1">Kawasaki Ninja - Genel Kontrol</h6>
-                                                <p class="text-muted mb-1">Müşteri: Ali Kaya</p>
-                                                <small class="text-muted">Saat: 18:00 - 19:00</small>
-                                            </div>
-                                            <span class="badge bg-success">Düşük Öncelik</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                    @if(session('error'))
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            {{ session('error') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
-                        
-                        <div class="col-md-4">
-                            <div class="card mb-3">
-                                <div class="card-header">
-                                    <h5 class="mb-0">
-                                        <i class="fas fa-clock me-2"></i>
-                                        Bugünkü Program
-                                    </h5>
-                                </div>
-                                <div class="card-body">
-                                    <div class="timeline">
-                                        <div class="d-flex align-items-center mb-3">
-                                            <div class="bg-success rounded-circle p-2 me-3">
-                                                <i class="fas fa-check text-white"></i>
-                                            </div>
-                                            <div>
-                                                <h6 class="mb-0">Honda CBR 600</h6>
-                                                <small class="text-muted">09:00 - 11:00 (Tamamlandı)</small>
-                                            </div>
-                                        </div>
-                                        <div class="d-flex align-items-center mb-3">
-                                            <div class="bg-success rounded-circle p-2 me-3">
-                                                <i class="fas fa-check text-white"></i>
-                                            </div>
-                                            <div>
-                                                <h6 class="mb-0">Yamaha R1</h6>
-                                                <small class="text-muted">11:30 - 13:00 (Tamamlandı)</small>
-                                            </div>
-                                        </div>
-                                        <div class="d-flex align-items-center mb-3">
-                                            <div class="bg-warning rounded-circle p-2 me-3">
-                                                <i class="fas fa-clock text-white"></i>
-                                            </div>
-                                            <div>
-                                                <h6 class="mb-0">Honda CBR 600</h6>
-                                                <small class="text-muted">14:00 - 16:00 (Devam Ediyor)</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
+                    @endif
+
+                    <!-- Welcome Card -->
+                    <div class="row">
+                        <div class="col-12">
                             <div class="card">
-                                <div class="card-header">
-                                    <h5 class="mb-0">
-                                        <i class="fas fa-tools me-2"></i>
-                                        Hızlı İşlemler
-                                    </h5>
-                                </div>
-                                <div class="card-body">
-                                    <div class="d-grid gap-2">
-                                        <a href="{{ route('staff.bakim.index') }}" class="btn btn-primary">
-                                            <i class="fas fa-cogs me-2"></i>
-                                            Servislerim
-                                        </a>
-                                        <a href="{{ route('staff.bakim.index') }}?bakim_durumu=Devam Ediyor" class="btn btn-warning">
-                                            <i class="fas fa-clock me-2"></i>
-                                            Devam Eden Servisler
-                                        </a>
-                                        <a href="{{ route('staff.bakim.index') }}?bakim_durumu=Tamamlandı" class="btn btn-success">
-                                            <i class="fas fa-check me-2"></i>
-                                            Tamamlanan Servisler
-                                        </a>
-                                        <button class="btn btn-info">
-                                            <i class="fas fa-chart-line me-2"></i>
-                                            Performans Raporu
-                                        </button>
-                                    </div>
+                                <div class="card-body text-center py-5">
+                                    <i class="fas fa-motorcycle fa-4x text-success mb-4"></i>
+                                    <h3 class="mb-3">Hoş Geldiniz, {{ $user->name }}!</h3>
+                                    <p class="text-muted mb-4">Bakım işlemlerinizi yönetmek için aşağıdaki butona tıklayın.</p>
+                                    <a href="{{ route('staff.bakim.index') }}" class="btn btn-success btn-lg">
+                                        <i class="fas fa-cogs me-2"></i>
+                                        Bakım Listesine Git
+                                    </a>
                                 </div>
                             </div>
                         </div>
