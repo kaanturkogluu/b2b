@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Raporlar - Motojet Servis</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -153,47 +154,44 @@
     <div class="container-fluid">
         <div class="row">
             <!-- Sidebar -->
-            <div class="col-md-3 col-lg-2 px-0">
-                <div class="sidebar">
-                    <div class="p-3">
-                        <h4 class="text-white mb-4">
-                            <i class="fas fa-chart-line me-2"></i>Raporlar
-                        </h4>
-                        <nav class="nav flex-column">
-                            <a class="nav-link" href="{{ route('dashboard') }}">
-                                <i class="fas fa-tachometer-alt me-2"></i>Dashboard
-                            </a>
-                            <a class="nav-link" href="{{ route('bakim.index') }}">
-                                <i class="fas fa-tools me-2"></i>Servis Yönetimi
-                            </a>
-                            
-                            @auth
-                                @if(auth()->user()->role === 'admin')
-                                    <a class="nav-link" href="{{ route('users.index') }}">
-                                        <i class="fas fa-users me-2"></i>Kullanıcı Yönetimi
-                                    </a>
-                                    <a class="nav-link" href="{{ route('invoice-settings.index') }}">
-                                        <i class="fas fa-file-invoice me-2"></i>Fatura Ayarları
-                                    </a>
-                                    <a class="nav-link active" href="{{ route('reports.index') }}">
-                                        <i class="fas fa-chart-line me-2"></i>Raporlar
-                                    </a>
-                                @elseif(auth()->user()->role === 'staff')
-                                    <a class="nav-link" href="{{ route('staff.bakim.index') }}">
-                                        <i class="fas fa-list me-2"></i>Servislerim
-                                    </a>
-                                @endif
-                            @endauth
-                            
-                            <hr class="text-white-50">
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <button type="submit" class="nav-link btn btn-link text-white p-0 w-100 text-start" style="border: none; background: none;">
-                                    <i class="fas fa-sign-out-alt me-2"></i>Çıkış Yap
-                                </button>
-                            </form>
-                        </nav>
-                    </div>
+            <div class="col-md-3 col-lg-2 sidebar">
+                <div class="p-3">
+                    <h4 class="text-center mb-4">
+                        <i class="fas fa-motorcycle me-2"></i>
+                        MotoJet Servis
+                    </h4>
+                    <nav class="nav flex-column">
+                        <a class="nav-link" href="{{ route('dashboard') }}">
+                            <i class="fas fa-tachometer-alt me-2"></i>
+                            Dashboard
+                        </a>
+                        <a class="nav-link" href="{{ route('bakim.index') }}">
+                            <i class="fas fa-tools me-2"></i>
+                            Servis Yönetimi
+                        </a>
+                        
+                        @auth
+                            @if(auth()->user()->role === 'admin')
+                                <a class="nav-link" href="{{ route('users.index') }}">
+                                    <i class="fas fa-users me-2"></i>
+                                    Kullanıcı Yönetimi
+                                </a>
+                                <a class="nav-link active" href="{{ route('reports.index') }}">
+                                    <i class="fas fa-chart-line me-2"></i>
+                                    Raporlar
+                                </a>
+                                <a class="nav-link" href="{{ route('invoice-settings.index') }}">
+                                    <i class="fas fa-file-invoice me-2"></i>
+                                    Fatura Ayarları
+                                </a>
+                            @elseif(auth()->user()->role === 'staff')
+                                <a class="nav-link" href="{{ route('staff.bakim.index') }}">
+                                    <i class="fas fa-list me-2"></i>
+                                    Servislerim
+                                </a>
+                            @endif
+                        @endauth
+                    </nav>
                 </div>
             </div>
 
@@ -252,14 +250,12 @@
                                    class="btn btn-outline-primary me-2" target="_blank">
                                     <i class="fas fa-file-pdf me-2"></i>Servis Raporu
                                 </a>
-                                <a href="{{ route('reports.financial-report', ['start_date' => $startDate, 'end_date' => $endDate]) }}" 
-                                   class="btn btn-outline-success me-2" target="_blank">
+                                <button type="button" class="btn btn-outline-success me-2" onclick="showUpgradeAlert('Mali Rapor')">
                                     <i class="fas fa-chart-bar me-2"></i>Mali Rapor
-                                </a>
-                                <a href="{{ route('reports.staff-report', ['start_date' => $startDate, 'end_date' => $endDate]) }}" 
-                                   class="btn btn-outline-info" target="_blank">
+                                </button>
+                                <button type="button" class="btn btn-outline-info" onclick="showUpgradeAlert('Personel Raporu')">
                                     <i class="fas fa-users me-2"></i>Personel Raporu
-                                </a>
+                                </button>
                             </div>
                         </div>
                     </form>
@@ -363,5 +359,28 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function showUpgradeAlert(reportType) {
+            Swal.fire({
+                title: 'Sistem Yükseltmesi Gerekli',
+                html: `
+                    <div class="text-center">
+                        <i class="fas fa-tools fa-3x text-warning mb-3"></i>
+                        <p><strong>${reportType}</strong> özelliği henüz aktif değil.</p>
+                        <p>Bu raporu görüntülemek için sistem yükseltmesi gereklidir.</p>
+                        <p class="text-muted">Lütfen sistem yöneticisi ile iletişime geçin.</p>
+                    </div>
+                `,
+                icon: 'info',
+                confirmButtonText: 'Tamam',
+                confirmButtonColor: '#667eea',
+                showCancelButton: false,
+                customClass: {
+                    popup: 'swal2-popup-custom'
+                }
+            });
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 </html>

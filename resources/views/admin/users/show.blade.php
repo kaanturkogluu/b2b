@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kullanıcı Detayları - MotoJet Servis</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -88,22 +89,32 @@
                             <i class="fas fa-tachometer-alt me-2"></i>
                             Dashboard
                         </a>
-                        <a class="nav-link active" href="{{ route('users.index') }}">
-                            <i class="fas fa-users me-2"></i>
-                            Kullanıcılar
-                        </a>
                         <a class="nav-link" href="{{ route('bakim.index') }}">
-                            <i class="fas fa-cogs me-2"></i>
-                            Servisler
+                            <i class="fas fa-tools me-2"></i>
+                            Servis Yönetimi
                         </a>
-                        <a class="nav-link" href="{{ route('reports.index') }}">
-                            <i class="fas fa-chart-line me-2"></i>
-                            Raporlar
-                        </a>
-                        <a class="nav-link" href="{{ route('invoice-settings.index') }}">
-                            <i class="fas fa-file-invoice me-2"></i>
-                            Fatura Ayarları
-                        </a>
+                        
+                        @auth
+                            @if(auth()->user()->role === 'admin')
+                                <a class="nav-link active" href="{{ route('users.index') }}">
+                                    <i class="fas fa-users me-2"></i>
+                                    Kullanıcı Yönetimi
+                                </a>
+                                <a class="nav-link" href="{{ route('reports.index') }}">
+                                    <i class="fas fa-chart-line me-2"></i>
+                                    Raporlar
+                                </a>
+                                <a class="nav-link" href="{{ route('invoice-settings.index') }}">
+                                    <i class="fas fa-file-invoice me-2"></i>
+                                    Fatura Ayarları
+                                </a>
+                            @elseif(auth()->user()->role === 'staff')
+                                <a class="nav-link" href="{{ route('staff.bakim.index') }}">
+                                    <i class="fas fa-list me-2"></i>
+                                    Servislerim
+                                </a>
+                            @endif
+                        @endauth
                     </nav>
                 </div>
             </div>

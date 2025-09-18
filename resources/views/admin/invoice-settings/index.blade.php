@@ -4,156 +4,97 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fatura Çıktı Ayarları - Motojet Servis</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         body {
             background-color: #f8f9fa;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        
-        .main-container {
-            min-height: 100vh;
-            display: flex;
-        }
-        
         .sidebar {
-            width: 250px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
             color: white;
-            padding: 0;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
         }
-        
-        .sidebar-header {
-            padding: 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .sidebar-header h4 {
-            margin: 0;
-            font-weight: 600;
-        }
-        
-        .sidebar-menu {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        
-        .sidebar-menu li {
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .sidebar-menu a {
-            display: block;
-            padding: 15px 20px;
-            color: white;
-            text-decoration: none;
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin: 5px 0;
             transition: all 0.3s ease;
         }
-        
-        .sidebar-menu a:hover {
-            background-color: rgba(255,255,255,0.1);
+        .sidebar .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
             color: white;
         }
-        
-        .sidebar-menu a.active {
-            background-color: rgba(255,255,255,0.2);
-            border-right: 3px solid white;
+        .sidebar .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
         }
-        
         .main-content {
-            flex: 1;
-            padding: 0;
-            background-color: #f8f9fa;
+            padding: 2rem;
         }
-        
-        .header {
-            background: white;
-            padding: 20px 30px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            border-bottom: 1px solid #e9ecef;
-        }
-        
-        .content {
-            padding: 30px;
-        }
-        
         .card {
             border: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+        }
+        .header {
+            background: white;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid #e9ecef;
+            margin-bottom: 2rem;
             border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
-        
-        .card-header {
+        .btn-primary {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 10px 10px 0 0 !important;
-            padding: 20px;
+            border: none;
+            border-radius: 8px;
         }
-        
-        .card-header h5 {
-            margin: 0;
-            font-weight: 600;
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
         }
-        
         .form-label {
             font-weight: 600;
             color: #495057;
             margin-bottom: 8px;
         }
-        
         .form-control {
             border-radius: 8px;
             border: 2px solid #e9ecef;
             padding: 12px 15px;
             transition: all 0.3s ease;
         }
-        
         .form-control:focus {
             border-color: #667eea;
             box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
         }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            border-radius: 8px;
-            padding: 12px 30px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-        }
-        
         .btn-secondary {
             border-radius: 8px;
             padding: 12px 30px;
             font-weight: 600;
         }
-        
         .alert {
             border-radius: 8px;
             border: none;
         }
-        
         .preview-section {
             background-color: #f8f9fa;
             border-radius: 8px;
             padding: 20px;
             margin-top: 20px;
         }
-        
         .preview-title {
             font-weight: 600;
             color: #495057;
             margin-bottom: 15px;
         }
-        
         .preview-content {
             background: white;
             padding: 20px;
@@ -163,51 +104,81 @@
     </style>
 </head>
 <body>
-    <div class="main-container">
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <h4><i class="fas fa-cogs me-2"></i>Admin Panel</h4>
-            </div>
-            <ul class="sidebar-menu">
-                <li><a href="{{ route('dashboard') }}"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
-                <li><a href="{{ route('bakim.index') }}"><i class="fas fa-cogs me-2"></i>Servisler</a></li>
-                <li><a href="{{ route('users.index') }}"><i class="fas fa-users me-2"></i>Kullanıcılar</a></li>
-                <li><a href="{{ route('reports.index') }}"><i class="fas fa-chart-line me-2"></i>Raporlar</a></li>
-                <li><a href="{{ route('invoice-settings.index') }}" class="active"><i class="fas fa-file-invoice me-2"></i>Fatura Ayarları</a></li>
-                <li>
-                    <form method="POST" action="{{ route('logout') }}" class="d-inline">
-                        @csrf
-                        <button type="submit" class="btn btn-link text-white p-0 w-100 text-start" style="border: none; background: none;">
-                            <i class="fas fa-sign-out-alt me-2"></i>Çıkış Yap
-                        </button>
-                    </form>
-                </li>
-            </ul>
-        </div>
-
-        <!-- Main Content -->
-        <div class="main-content">
-            <div class="header">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h2 class="mb-0">Fatura Çıktı Ayarları</h2>
-                        <p class="text-muted mb-0">Fatura çıktılarında görünecek şirket bilgilerini düzenleyin</p>
-                    </div>
-                    <div class="d-flex align-items-center gap-2">
-                        <span class="badge bg-primary">Admin</span>
-                    </div>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 sidebar">
+                <div class="p-3">
+                    <h4 class="text-center mb-4">
+                        <i class="fas fa-motorcycle me-2"></i>
+                        MotoJet Servis
+                    </h4>
+                    <nav class="nav flex-column">
+                        <a class="nav-link" href="{{ route('dashboard') }}">
+                            <i class="fas fa-tachometer-alt me-2"></i>
+                            Dashboard
+                        </a>
+                        <a class="nav-link" href="{{ route('bakim.index') }}">
+                            <i class="fas fa-tools me-2"></i>
+                            Servis Yönetimi
+                        </a>
+                        
+                        @auth
+                            @if(auth()->user()->role === 'admin')
+                                <a class="nav-link" href="{{ route('users.index') }}">
+                                    <i class="fas fa-users me-2"></i>
+                                    Kullanıcı Yönetimi
+                                </a>
+                                <a class="nav-link" href="{{ route('reports.index') }}">
+                                    <i class="fas fa-chart-line me-2"></i>
+                                    Raporlar
+                                </a>
+                                <a class="nav-link active" href="{{ route('invoice-settings.index') }}">
+                                    <i class="fas fa-file-invoice me-2"></i>
+                                    Fatura Ayarları
+                                </a>
+                            @elseif(auth()->user()->role === 'staff')
+                                <a class="nav-link" href="{{ route('staff.bakim.index') }}">
+                                    <i class="fas fa-list me-2"></i>
+                                    Servislerim
+                                </a>
+                            @endif
+                        @endauth
+                    </nav>
                 </div>
             </div>
 
-            <div class="content">
-                @if(session('success'))
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <i class="fas fa-check-circle me-2"></i>
-                        {{ session('success') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10">
+                <div class="main-content">
+                    <!-- Header -->
+                    <div class="header d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="mb-0">Fatura Çıktı Ayarları</h2>
+                            <p class="text-muted mb-0">Fatura çıktılarında görünecek şirket bilgilerini düzenleyin</p>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-primary me-3">Admin</span>
+                            <form method="POST" action="{{ route('logout') }}" class="d-inline">
+                                @csrf
+                                <button type="submit" class="btn btn-outline-danger">
+                                    <i class="fas fa-sign-out-alt me-2"></i>
+                                    Çıkış Yap
+                                </button>
+                            </form>
+                        </div>
                     </div>
-                @endif
+
+                    <!-- Flash Messages -->
+                    @if(session('success'))
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle me-2"></i>
+                            {{ session('success') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    @endif
+
+                    <div class="row">
 
                 <div class="row">
                     <div class="col-lg-8">
@@ -324,11 +295,12 @@
                         </div>
                     </div>
                 </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // Live preview functionality
         document.addEventListener('DOMContentLoaded', function() {

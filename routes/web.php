@@ -35,8 +35,7 @@ Route::middleware(['web', 'auth'])->group(function () {
         // Reports Routes
         Route::get('/reports', [\App\Http\Controllers\ReportsController::class, 'index'])->name('reports.index');
         Route::get('/reports/service-report', [\App\Http\Controllers\ReportsController::class, 'serviceReport'])->name('reports.service-report');
-        Route::get('/reports/financial-report', [\App\Http\Controllers\ReportsController::class, 'financialReport'])->name('reports.financial-report');
-        Route::get('/reports/staff-report', [\App\Http\Controllers\ReportsController::class, 'staffReport'])->name('reports.staff-report');
+        // Mali rapor ve personel raporu route'ları kaldırıldı - sistem yükseltmesi gerekli
         
     });
     
