@@ -81,9 +81,15 @@
             background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
             color: white;
         }
+        
+        .badge-payment-approved {
+            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+            color: white;
+        }
+        
     </style>
 </head>
-<body>
+<body class="theme-staff">
     <div class="container-fluid">
         <div class="row">
             <!-- Sidebar -->
@@ -100,7 +106,7 @@
                         </a>
                         <a class="nav-link active" href="{{ route('staff.bakim.index') }}">
                             <i class="fas fa-cogs me-2"></i>
-                            Bakım Listesi
+                            Tüm Bakımlar
                         </a>
                     </nav>
                 </div>
@@ -112,8 +118,8 @@
                     <!-- Header -->
                     <div class="header d-flex justify-content-between align-items-center">
                         <div>
-                            <h2 class="mb-0">Servislerim</h2>
-                            <p class="text-muted mb-0">Sorumlu olduğunuz servisler</p>
+                            <h2 class="mb-0">Tüm Servisler</h2>
+                            <p class="text-muted mb-0">Tüm bakım kayıtları ve onaylama işlemleri</p>
                         </div>
                         <div class="d-flex align-items-center">
                             <span class="badge bg-success me-3">Personel</span>
@@ -144,11 +150,60 @@
                         </div>
                     @endif
 
+                    <!-- Statistics Cards -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card bg-warning text-white">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h4 class="mb-0">{{ $bakimlar->where('bakim_durumu', 'Devam Ediyor')->count() }}</h4>
+                                            <p class="mb-0">Bekleyen Bakım</p>
+                                        </div>
+                                        <div class="align-self-center">
+                                            <i class="fas fa-clock fa-2x"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-info text-white">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h4 class="mb-0">{{ $bakimlar->where('bakim_durumu', 'Tamamlandı')->where('odeme_durumu', 1)->count() }}</h4>
+                                            <p class="mb-0">Tamamlanan</p>
+                                        </div>
+                                        <div class="align-self-center">
+                                            <i class="fas fa-check-circle fa-2x"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h4 class="mb-0">{{ $bakimlar->total() }}</h4>
+                                            <p class="mb-0">Toplam Bakım</p>
+                                        </div>
+                                        <div class="align-self-center">
+                                            <i class="fas fa-cogs fa-2x"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="card">
                         <div class="card-header">
                             <h5 class="mb-0">
                                 <i class="fas fa-cogs me-2"></i>
-                                Tüm Servisler
+                                Bakım Kayıtları
                             </h5>
                         </div>
                         <div class="card-body">
@@ -259,6 +314,7 @@
                                             <th>Müşteri</th>
                                             <th>Telefon</th>
                                             <th>Bakım Durumu</th>
+                                            <th>Oluşturan</th>
                                             <th>Onaylayan Personel</th>
                                             <th>Ödeme Durumu</th>
                                             <th>Ücret</th>
@@ -268,7 +324,7 @@
                                     </thead>
                                     <tbody>
                                         @forelse($bakimlar as $bakim)
-                                            <tr>
+                                            <tr class="@if($bakim->bakim_durumu == 'Devam Ediyor') table-warning @elseif($bakim->bakim_durumu == 'Tamamlandı' && $bakim->odeme_durumu == 0) table-info @elseif($bakim->bakim_durumu == 'Tamamlandı' && $bakim->odeme_durumu == 1) table-success @endif">
                                                 <td>{{ $bakim->id }}</td>
                                                 <td>
                                                     <strong>{{ $bakim->plaka }}</strong>
@@ -279,9 +335,20 @@
                                                 <td>{{ $bakim->telefon_numarasi }}</td>
                                                 <td>
                                                     @if($bakim->bakim_durumu == 'Devam Ediyor')
-                                                        <span class="badge badge-devam">Devam Ediyor</span>
+                                                        @if($bakim->odeme_durumu == 1)
+                                                            <span class="badge bg-info">Devam Ediyor (Ödeme Alındı)</span>
+                                                        @else
+                                                            <span class="badge badge-devam">Devam Ediyor</span>
+                                                        @endif
                                                     @else
                                                         <span class="badge badge-tamamlandi">Tamamlandı</span>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    @if($bakim->admin)
+                                                        <span class="badge bg-primary">{{ $bakim->admin->name }}</span>
+                                                    @else
+                                                        <span class="badge bg-secondary">Bilinmiyor</span>
                                                     @endif
                                                 </td>
                                                 <td>
@@ -292,10 +359,10 @@
                                                     @endif
                                                 </td>
                                                 <td>
-                                                    @if($bakim->odeme_durumu == 0)
-                                                        <span class="badge badge-odeme-bekliyor">Ödeme Bekliyor</span>
+                                                    @if($bakim->bakim_durumu == 'Devam Ediyor')
+                                                        <span class="badge bg-warning">Bakım Devam Ediyor</span>
                                                     @else
-                                                        <span class="badge badge-odeme-alindi">Ödeme Alındı</span>
+                                                        <span class="badge badge-tamamlandi">Tamamlandı</span>
                                                     @endif
                                                 </td>
                                                 <td>
@@ -315,20 +382,23 @@
                                                                     data-bs-toggle="modal" 
                                                                     data-bs-target="#completeModal{{ $bakim->id }}"
                                                                     title="Bakımı Onayla">
-                                                                <i class="fas fa-check"></i>
+                                                                <i class="fas fa-check me-1"></i>
+                                                                Onayla
                                                             </button>
+                                                        @elseif($bakim->bakim_durumu == 'Tamamlandı' && $bakim->odeme_durumu == 0)
+                                                            <span class="badge bg-info">Ödeme Bekliyor</span>
                                                         @else
-                                                            <span class="badge bg-success">Onaylandı</span>
+                                                            <span class="badge bg-success">Tamamlandı</span>
                                                         @endif
                                                     </div>
                                                 </td>
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="10" class="text-center py-4">
+                                                <td colspan="11" class="text-center py-4">
                                                     <div class="text-muted">
                                                         <i class="fas fa-cogs fa-3x mb-3"></i>
-                                                        <p>Henüz size atanmış servis bulunmuyor.</p>
+                                                        <p>Henüz bakım kaydı bulunmuyor.</p>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -339,8 +409,18 @@
 
                             <!-- Pagination -->
                             @if($bakimlar->hasPages())
-                                <div class="d-flex justify-content-center">
-                                    {{ $bakimlar->appends(request()->query())->links() }}
+                                <div class="pagination-container">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="pagination-info">
+                                            <small class="text-muted">
+                                                Toplam {{ $bakimlar->total() }} kayıttan 
+                                                {{ $bakimlar->firstItem() ?? 0 }}-{{ $bakimlar->lastItem() ?? 0 }} arası gösteriliyor
+                                            </small>
+                                        </div>
+                                        <div class="pagination-links">
+                                            {{ $bakimlar->appends(request()->query())->links() }}
+                                        </div>
+                                    </div>
                                 </div>
                             @endif
                         </div>

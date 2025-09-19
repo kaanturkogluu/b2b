@@ -18,23 +18,18 @@ class BakimController extends Controller
      */
     public function index(Request $request)
     {
-        // Cache key oluştur
-        $cacheKey = 'bakim_index_' . md5(serialize($request->all()));
-        
-        // Cache'den veri al veya veritabanından çek
-        $bakimlar = cache()->remember($cacheKey, 300, function() use ($request) { // 5 dakika cache
-            $query = Bakim::select([
-                'id', 'plaka', 'sase', 'musteri_adi', 'telefon_numarasi', 
-                'bakim_durumu', 'odeme_durumu', 'ucret', 'genel_aciklama',
-                'admin_id', 'personel_id', 'tamamlayan_personel_id', 
-                'bakim_tarihi', 'tahmini_teslim_tarihi', 'created_at'
-            ])
-            ->with([
-                'admin:id,name,username',
-                'personel:id,name,username',
-                'tamamlayanPersonel:id,name,username',
-                'degisecekParcalar:id,bakim_id,parca_adi,adet,birim_fiyat'
-            ]);
+        $query = Bakim::select([
+            'id', 'plaka', 'sase', 'musteri_adi', 'telefon_numarasi', 
+            'bakim_durumu', 'odeme_durumu', 'ucret', 'genel_aciklama',
+            'admin_id', 'personel_id', 'tamamlayan_personel_id', 
+            'bakim_tarihi', 'tahmini_teslim_tarihi', 'created_at'
+        ])
+        ->with([
+            'admin:id,name,username',
+            'personel:id,name,username',
+            'tamamlayanPersonel:id,name,username',
+            'degisecekParcalar:id,bakim_id,parca_adi,adet,birim_fiyat'
+        ]);
             
             // Arama filtresi - Full-text search için optimize edildi
             if ($request->filled('search')) {
@@ -56,9 +51,7 @@ class BakimController extends Controller
                 $query->where('odeme_durumu', $request->odeme_durumu);
             }
             
-            if ($request->filled('personel_id')) {
-                $query->where('personel_id', $request->personel_id);
-            }
+            // Personel filtreleme kaldırıldı - sadece tamamlayan personel gösterilir
             
             // Tarih aralığı - Index kullanımı için optimize edildi
             if ($request->filled('start_date')) {
@@ -89,21 +82,13 @@ class BakimController extends Controller
                 $query->orderBy('created_at', 'desc');
             }
             
-            return $query->paginate(10)->appends($request->query());
-        });
+        $bakimlar = $query->paginate(10)->appends($request->query());
         
-        // Personelleri cache'le
-        $personeller = cache()->remember('active_personeller', 3600, function() { // 1 saat cache
-            return User::select('id', 'name', 'username')
-                      ->where('role', 'personel')
-                      ->where('is_active', true)
-                      ->orderBy('name')
-                      ->get();
-        });
+        // Personel listesi kaldırıldı - sadece tamamlayan personel gösterilir
         
         $filterOptions = $this->getFilterOptions();
             
-        return view('admin.bakim.index', compact('bakimlar', 'personeller', 'filterOptions'));
+        return view('admin.bakim.index', compact('bakimlar', 'filterOptions'));
     }
 
     /**
@@ -113,24 +98,19 @@ class BakimController extends Controller
     {
         $user = Auth::user();
         
-        // Cache key oluştur
-        $cacheKey = 'staff_bakim_index_' . $user->id . '_' . md5(serialize($request->all()));
-        
-        // Cache'den veri al veya veritabanından çek
-        $bakimlar = cache()->remember($cacheKey, 300, function() use ($request, $user) { // 5 dakika cache
-            $query = Bakim::select([
-                'id', 'plaka', 'sase', 'musteri_adi', 'telefon_numarasi', 
-                'bakim_durumu', 'odeme_durumu', 'ucret', 'genel_aciklama',
-                'admin_id', 'personel_id', 'tamamlayan_personel_id', 
-                'bakim_tarihi', 'tahmini_teslim_tarihi', 'created_at'
-            ])
-            ->with([
-                'admin:id,name,username',
-                'personel:id,name,username',
-                'tamamlayanPersonel:id,name,username',
-                'degisecekParcalar:id,bakim_id,parca_adi,adet,birim_fiyat'
-            ])
-            ->where('personel_id', $user->id);
+        $query = Bakim::select([
+            'id', 'plaka', 'sase', 'musteri_adi', 'telefon_numarasi', 
+            'bakim_durumu', 'odeme_durumu', 'ucret', 'genel_aciklama',
+            'admin_id', 'personel_id', 'tamamlayan_personel_id', 
+            'bakim_tarihi', 'tahmini_teslim_tarihi', 'created_at'
+        ])
+        ->with([
+            'admin:id,name,username',
+            'personel:id,name,username',
+            'tamamlayanPersonel:id,name,username',
+            'degisecekParcalar:id,bakim_id,parca_adi,adet,birim_fiyat'
+        ]);
+        // Personeller artık tüm bakımları görebilir - filtreleme kaldırıldı
             
             // Arama filtresi - Full-text search için optimize edildi
             if ($request->filled('search')) {
@@ -172,8 +152,7 @@ class BakimController extends Controller
                 $query->orderBy('created_at', 'desc');
             }
             
-            return $query->paginate(10)->appends($request->query());
-        });
+        $bakimlar = $query->paginate(10)->appends($request->query());
         
         $filterOptions = $this->getFilterOptions();
             
@@ -234,7 +213,7 @@ class BakimController extends Controller
                 'genel_aciklama' => $request->genel_aciklama ?? 'Beklemede',
                 'admin_id' => Auth::id(),
                 'bakim_tarihi' => $request->bakim_tarihi,
-                'personel_id' => $request->personel_id ?? null
+                'personel_id' => null // Servis oluşturulurken personel atanmaz
             ]);
 
             if ($request->has('parcalar')) {
@@ -268,8 +247,6 @@ class BakimController extends Controller
                 ]
             );
 
-            // Cache'i temizle
-            $this->clearBakimCache();
 
             DB::commit();
             return redirect()->route('bakim.index')->with('success', 'Bakım kaydı başarıyla oluşturuldu.');
@@ -284,7 +261,7 @@ class BakimController extends Controller
      */
     public function show(Bakim $bakim)
     {
-        $bakim->load(['admin', 'personel', 'degisecekParcalar']);
+        $bakim->load(['admin', 'tamamlayanPersonel', 'degisecekParcalar']);
         return view('admin.bakim.show', compact('bakim'));
     }
 
@@ -293,7 +270,7 @@ class BakimController extends Controller
      */
     public function edit(Bakim $bakim)
     {
-        $personeller = User::where('role', 'staff')->get();
+        $personeller = User::where('role', 'personel')->get();
         $bakim->load('degisecekParcalar');
         return view('admin.bakim.edit', compact('bakim', 'personeller'));
     }
@@ -319,7 +296,7 @@ class BakimController extends Controller
             'ucret' => 'required|numeric|min:0',
             'genel_aciklama' => 'nullable|string|max:255',
             'bakim_tarihi' => 'required|date',
-            'personel_id' => 'nullable|exists:users,id',
+            // personel_id kaldırıldı - sadece tamamlayan personel kaydedilir
             'parcalar' => 'nullable|array',
             'parcalar.*.parca_adi' => 'required_with:parcalar|string|max:255',
             'parcalar.*.adet' => 'required_with:parcalar|integer|min:1',
@@ -329,13 +306,10 @@ class BakimController extends Controller
 
         DB::beginTransaction();
         try {
-            // Eğer bakım tamamlandıysa ve personel_id verilmişse, personel ataması yap
-            $personelId = $bakim->personel_id;
-            if ($request->bakim_durumu == 'Tamamlandı' && $request->personel_id) {
-                $personelId = $request->personel_id;
-            }
+            // Personel ataması kaldırıldı - sadece tamamlayan personel kaydedilir
 
-            $bakim->update([
+            // Bakım durumu "Tamamlandı" olarak değiştiriliyorsa tamamlayan personel bilgilerini set et
+            $updateData = [
                 'plaka' => $request->plaka,
                 'sase' => $request->sase,
                 'tahmini_teslim_tarihi' => $request->tahmini_teslim_tarihi,
@@ -346,8 +320,32 @@ class BakimController extends Controller
                 'ucret' => $request->ucret,
                 'genel_aciklama' => $request->genel_aciklama,
                 'bakim_tarihi' => $request->bakim_tarihi,
-                'personel_id' => $personelId
-            ]);
+                // personel_id kaldırıldı
+            ];
+
+            // Eğer bakım durumu "Tamamlandı" olarak değiştiriliyorsa ve henüz tamamlayan personel yoksa
+            if ($request->bakim_durumu == 'Tamamlandı' && !$bakim->tamamlayan_personel_id) {
+                $updateData['tamamlayan_personel_id'] = Auth::id();
+                $updateData['tamamlanma_tarihi'] = now();
+            }
+
+            $bakim->update($updateData);
+
+            // Eğer bakım tamamlandıysa activity log ekle
+            if ($request->bakim_durumu == 'Tamamlandı' && !$bakim->tamamlayan_personel_id) {
+                ActivityLog::log(
+                    'bakim_completed',
+                    "Bakım admin tarafından tamamlandı: {$bakim->plaka} - {$bakim->musteri_adi}",
+                    Auth::id(),
+                    $bakim->id,
+                    'App\Models\Bakim',
+                    [
+                        'plaka' => $bakim->plaka,
+                        'musteri_adi' => $bakim->musteri_adi,
+                        'tamamlayan_personel_id' => Auth::id()
+                    ]
+                );
+            }
 
             // Parçaları güncelle (mevcut parçaları koru, sadece güncelle veya yeni ekle)
             if ($request->has('parcalar')) {
@@ -381,6 +379,7 @@ class BakimController extends Controller
                 // Bu sayede ödeme alındıktan sonra da parça bilgileri korunur
             }
 
+
             DB::commit();
             return redirect()->route('bakim.index')->with('success', 'Bakım kaydı başarıyla güncellendi.');
         } catch (\Exception $e) {
@@ -394,7 +393,7 @@ class BakimController extends Controller
      */
     public function print(Bakim $bakim)
     {
-        $bakim->load(['admin', 'personel', 'degisecekParcalar']);
+        $bakim->load(['admin', 'tamamlayanPersonel', 'degisecekParcalar']);
         
         // Fatura ayarlarını al
         $invoiceSettings = InvoiceSetting::getSettings();
@@ -403,12 +402,77 @@ class BakimController extends Controller
     }
 
     /**
+     * Approve payment for maintenance
+     */
+    public function approvePayment(Bakim $bakim)
+    {
+        // Ödeme zaten onaylanmış mı kontrol et
+        if ($bakim->odeme_durumu == 1) {
+            return back()->with('error', 'Bu bakım için ödeme zaten onaylanmış!');
+        }
+
+        $bakim->update([
+            'odeme_durumu' => 1
+        ]);
+
+        // Activity log
+        ActivityLog::log(
+            'payment_approved',
+            "Ödeme onaylandı: {$bakim->plaka} - {$bakim->musteri_adi}",
+            Auth::id(),
+            $bakim->id,
+            'App\Models\Bakim',
+            [
+                'plaka' => $bakim->plaka,
+                'musteri_adi' => $bakim->musteri_adi,
+                'ucret' => $bakim->ucret
+            ]
+        );
+
+        // Cache'i temizle
+        $this->clearBakimCache();
+
+        return back()->with('success', 'Ödeme başarıyla onaylandı!');
+    }
+
+    /**
+     * Clear bakım related cache
+     */
+    private function clearBakimCache()
+    {
+        // Clear any bakım related cache if needed
+        // For now, we'll just clear the general cache
+        \Cache::flush();
+    }
+
+    /**
      * Remove the specified resource from storage.
      */
     public function destroy(Bakim $bakim)
     {
         try {
+            // Store bakım data before deletion for activity log
+            $bakimData = [
+                'plaka' => $bakim->plaka,
+                'musteri_adi' => $bakim->musteri_adi,
+                'telefon_numarasi' => $bakim->telefon_numarasi,
+                'bakim_durumu' => $bakim->bakim_durumu,
+                'ucret' => $bakim->ucret,
+                'bakim_tarihi' => $bakim->bakim_tarihi?->format('Y-m-d H:i:s')
+            ];
+
             $bakim->delete();
+
+            // Activity log
+            ActivityLog::log(
+                'bakim_deleted',
+                "Bakım kaydı silindi: {$bakimData['plaka']} - {$bakimData['musteri_adi']}",
+                Auth::id(),
+                null, // related_id is null since record is deleted
+                'App\Models\Bakim',
+                $bakimData
+            );
+
             return redirect()->route('bakim.index')->with('success', 'Bakım kaydı başarıyla silindi.');
         } catch (\Exception $e) {
             return back()->with('error', 'Bakım kaydı silinirken bir hata oluştu: ' . $e->getMessage());
@@ -420,7 +484,7 @@ class BakimController extends Controller
      */
     public function exportExcel(Request $request)
     {
-        $query = Bakim::with(['admin', 'personel', 'degisecekParcalar']);
+        $query = Bakim::with(['admin', 'tamamlayanPersonel', 'degisecekParcalar']);
         
         // Apply same filters as index method
         if ($request->filled('search')) {
@@ -441,9 +505,7 @@ class BakimController extends Controller
             $query->where('odeme_durumu', $request->odeme_durumu);
         }
         
-        if ($request->filled('personel_id')) {
-            $query->where('personel_id', $request->personel_id);
-        }
+        // Personel filtreleme kaldırıldı
         
         if ($request->filled('start_date')) {
             $query->whereDate('bakim_tarihi', '>=', $request->start_date);
@@ -504,7 +566,7 @@ class BakimController extends Controller
                     $bakim->bakim_durumu,
                     $bakim->odeme_durumu ? 'Ödeme Alındı' : 'Ödeme Bekliyor',
                     number_format($bakim->ucret, 2),
-                    $bakim->personel->name ?? '-',
+                    $bakim->tamamlayanPersonel->name ?? '-',
                     $bakim->bakim_tarihi->format('d.m.Y'),
                     $bakim->tahmini_teslim_tarihi->format('d.m.Y'),
                     $bakim->genel_aciklama,
@@ -518,30 +580,6 @@ class BakimController extends Controller
         return response()->stream($callback, 200, $headers);
     }
 
-    /**
-     * Clear bakım related cache
-     */
-    private function clearBakimCache()
-    {
-        // Bakım listesi cache'lerini temizle
-        cache()->forget('active_personeller');
-        
-        // Pattern ile cache temizleme
-        $keys = cache()->getRedis()->keys('*bakim_index*');
-        foreach ($keys as $key) {
-            cache()->forget(str_replace(config('cache.prefix') . ':', '', $key));
-        }
-        
-        $keys = cache()->getRedis()->keys('*staff_bakim_index*');
-        foreach ($keys as $key) {
-            cache()->forget(str_replace(config('cache.prefix') . ':', '', $key));
-        }
-        
-        $keys = cache()->getRedis()->keys('*staff_dashboard*');
-        foreach ($keys as $key) {
-            cache()->forget(str_replace(config('cache.prefix') . ':', '', $key));
-        }
-    }
 
     /**
      * Get filter options for views

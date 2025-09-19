@@ -191,9 +191,11 @@
                                                         <div class="card-body">
                                                             <div class="d-flex justify-content-between align-items-start mb-2">
                                                                 <h6 class="mb-1">{{ $task->plaka }}</h6>
-                                                                <span class="badge {{ $task->bakim_durumu == 'Devam Ediyor' ? 'badge-devam' : 'badge-tamamlandi' }}">
-                                                                    {{ $task->bakim_durumu }}
-                                                                </span>
+                                                                @if($task->bakim_durumu == 'Devam Ediyor')
+                                                                    <span class="badge badge-devam">Devam Ediyor</span>
+                                                                @else
+                                                                    <span class="badge badge-tamamlandi">Tamamlandı</span>
+                                                                @endif
                                                             </div>
                                                             
                                                             <p class="text-muted mb-2">

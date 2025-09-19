@@ -95,6 +95,7 @@ class UserController extends Controller
             ]
         );
 
+
         return redirect()->route('users.index')
             ->with('success', 'Kullanıcı başarıyla oluşturuldu.');
     }
@@ -156,6 +157,7 @@ class UserController extends Controller
 
         $user->update($updateData);
 
+
         return redirect()->route('users.index')
             ->with('success', 'Kullanıcı başarıyla güncellendi.');
     }
@@ -171,7 +173,28 @@ class UserController extends Controller
                 ->with('error', 'Kendi hesabınızı silemezsiniz.');
         }
 
+        // Store user data before deletion for activity log
+        $userData = [
+            'name' => $user->name,
+            'username' => $user->username,
+            'email' => $user->email,
+            'role' => $user->role,
+            'is_active' => $user->is_active,
+            'created_at' => $user->created_at?->format('Y-m-d H:i:s')
+        ];
+
         $user->delete();
+
+        // Activity log
+        ActivityLog::log(
+            'user_deleted',
+            "Kullanıcı silindi: {$userData['name']} ({$userData['username']}) - {$userData['role']}",
+            Auth::id(),
+            null, // related_id is null since record is deleted
+            'App\Models\User',
+            $userData
+        );
+
 
         return redirect()->route('users.index')
             ->with('success', 'Kullanıcı başarıyla silindi.');
@@ -192,9 +215,11 @@ class UserController extends Controller
             'is_active' => !$user->is_active
         ]);
 
+
         $status = $user->is_active ? 'aktif' : 'pasif';
         
         return redirect()->route('users.index')
             ->with('success', "Kullanıcı {$status} hale getirildi.");
     }
+
 }

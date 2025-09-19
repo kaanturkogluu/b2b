@@ -1,0 +1,357 @@
+/* Global Pagination Styles for MotoJet Servis */
+
+/* Reset all pagination styles first */
+.pagination,
+.pagination *,
+.pagination-container,
+.pagination-container * {
+    box-sizing: border-box;
+}
+
+/* Pagination Container */
+.pagination-container {
+    background: #fff;
+    border-radius: 10px;
+    padding: 1rem;
+    margin-top: 1rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.pagination-container .d-flex {
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.pagination-info {
+    flex: 1;
+    min-width: 200px;
+}
+
+.pagination-links {
+    flex-shrink: 0;
+}
+
+/* Override Bootstrap's default pagination styles completely */
+nav .pagination,
+.pagination-container .pagination,
+.pagination {
+    margin: 0 !important;
+    padding: 0 !important;
+    display: flex !important;
+    list-style: none !important;
+    gap: 4px !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    align-items: center !important;
+}
+
+/* Pagination Base Styles */
+.pagination {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    list-style: none;
+    gap: 4px;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Page item styles */
+.pagination .page-item,
+nav .pagination .page-item,
+.pagination-container .pagination .page-item {
+    display: flex !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Page link styles - override everything */
+.pagination .page-link,
+nav .pagination .page-link,
+.pagination-container .pagination .page-link {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 40px !important;
+    height: 40px !important;
+    padding: 0.5rem 0.75rem !important;
+    color: #667eea !important;
+    background-color: #fff !important;
+    border: 1px solid #dee2e6 !important;
+    border-radius: 8px !important;
+    text-decoration: none !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+    font-weight: 500 !important;
+    font-size: 0.9rem !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+    margin: 0 !important;
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+/* Hover States - override everything */
+.pagination .page-link:hover,
+nav .pagination .page-link:hover,
+.pagination-container .pagination .page-link:hover {
+    color: #fff !important;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    border-color: #667eea !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3) !important;
+    text-decoration: none !important;
+}
+
+/* Active State - override everything */
+.pagination .page-item.active .page-link,
+nav .pagination .page-item.active .page-link,
+.pagination-container .pagination .page-item.active .page-link {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    border-color: #667eea !important;
+    color: #fff !important;
+    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.4) !important;
+    font-weight: 600 !important;
+}
+
+/* Disabled State - override everything */
+.pagination .page-item.disabled .page-link,
+nav .pagination .page-item.disabled .page-link,
+.pagination-container .pagination .page-item.disabled .page-link {
+    color: #6c757d !important;
+    background-color: #fff !important;
+    border-color: #dee2e6 !important;
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+}
+
+.pagination .page-item.disabled .page-link:hover,
+nav .pagination .page-item.disabled .page-link:hover,
+.pagination-container .pagination .page-item.disabled .page-link:hover {
+    transform: none !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+    background-color: #fff !important;
+    color: #6c757d !important;
+    border-color: #dee2e6 !important;
+}
+
+/* Previous/Next Buttons - override everything */
+.pagination .page-item:first-child .page-link,
+.pagination .page-item:last-child .page-link,
+nav .pagination .page-item:first-child .page-link,
+nav .pagination .page-item:last-child .page-link,
+.pagination-container .pagination .page-item:first-child .page-link,
+.pagination-container .pagination .page-item:last-child .page-link {
+    font-weight: 600 !important;
+    min-width: 40px !important;
+    max-width: 40px !important;
+    padding: 0.5rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* Arrow icons styling - override everything */
+.pagination .page-link i,
+.pagination .page-link svg,
+nav .pagination .page-link i,
+nav .pagination .page-link svg,
+.pagination-container .pagination .page-link i,
+.pagination-container .pagination .page-link svg {
+    font-size: 0.8rem !important;
+    width: 12px !important;
+    height: 12px !important;
+    margin: 0 !important;
+    display: inline-block !important;
+}
+
+/* Override Bootstrap default styles - more specific selectors */
+nav .pagination .page-link,
+nav .pagination .page-link:hover,
+nav .pagination .page-link:focus,
+nav .pagination .page-link:visited,
+nav .pagination .page-link:active,
+.pagination .page-link,
+.pagination .page-link:hover,
+.pagination .page-link:focus,
+.pagination .page-link:visited,
+.pagination .page-link:active {
+    text-decoration: none !important;
+    outline: none !important;
+    border-bottom: none !important;
+}
+
+/* Ensure no underlines appear - more specific */
+nav .pagination a,
+nav .pagination a:hover,
+nav .pagination a:focus,
+nav .pagination a:visited,
+nav .pagination a:active,
+.pagination a,
+.pagination a:hover,
+.pagination a:focus,
+.pagination a:visited,
+.pagination a:active {
+    text-decoration: none !important;
+    border-bottom: none !important;
+}
+
+/* Override any inherited link styles - more specific */
+.pagination-container nav a,
+.pagination-container nav a:hover,
+.pagination-container nav a:focus,
+.pagination-container nav a:visited,
+.pagination-container nav a:active,
+.pagination-container a,
+.pagination-container a:hover,
+.pagination-container a:focus,
+.pagination-container a:visited,
+.pagination-container a:active {
+    text-decoration: none !important;
+    border-bottom: none !important;
+}
+
+/* Force override for all pagination links */
+*[class*="pagination"] a,
+*[class*="pagination"] a:hover,
+*[class*="pagination"] a:focus,
+*[class*="pagination"] a:visited,
+*[class*="pagination"] a:active {
+    text-decoration: none !important;
+    border-bottom: none !important;
+}
+
+/* Ellipsis */
+.pagination .page-item .page-link[aria-label*="..."] {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    cursor: default;
+}
+
+.pagination .page-item .page-link[aria-label*="..."]:hover {
+    background: transparent;
+    transform: none;
+    box-shadow: none;
+    color: #667eea;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .pagination-container .d-flex {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    
+    .pagination-info {
+        margin-bottom: 1rem;
+    }
+    
+    .pagination {
+        justify-content: center;
+        gap: 2px;
+    }
+    
+    .pagination .page-link {
+        min-width: 35px;
+        height: 35px;
+        padding: 0.4rem 0.6rem;
+        font-size: 0.85rem;
+    }
+    
+    .pagination .page-item:first-child .page-link,
+    .pagination .page-item:last-child .page-link {
+        min-width: 35px;
+        max-width: 35px;
+    }
+}
+
+@media (max-width: 576px) {
+    .pagination-container {
+        padding: 0.75rem;
+    }
+    
+    .pagination .page-link {
+        min-width: 32px;
+        height: 32px;
+        padding: 0.3rem 0.5rem;
+        font-size: 0.8rem;
+    }
+    
+    .pagination .page-item:first-child .page-link,
+    .pagination .page-item:last-child .page-link {
+        min-width: 32px;
+        max-width: 32px;
+    }
+}
+
+/* Theme Variations */
+/* Staff Theme (Green) */
+.theme-staff .pagination .page-link {
+    color: #28a745;
+}
+
+.theme-staff .pagination .page-link:hover {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    border-color: #28a745;
+    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+}
+
+.theme-staff .pagination .page-item.active .page-link {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    border-color: #28a745;
+    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.4);
+}
+
+/* Admin Theme (Purple) - Default */
+.theme-admin .pagination .page-link {
+    color: #667eea;
+}
+
+.theme-admin .pagination .page-link:hover {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: #667eea;
+    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+}
+
+.theme-admin .pagination .page-item.active .page-link {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: #667eea;
+    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.4);
+}
+
+/* Accessibility Improvements */
+.pagination .page-link:focus {
+    outline: 2px solid #667eea;
+    outline-offset: 2px;
+}
+
+.pagination .page-link[aria-current="page"] {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: #667eea;
+    color: #fff;
+    font-weight: 600;
+}
+
+/* Print Styles */
+@media print {
+    .pagination-container {
+        background: transparent;
+        box-shadow: none;
+        border-top: 1px solid #dee2e6;
+    }
+    
+    .pagination .page-link {
+        background: transparent;
+        border: 1px solid #000;
+        color: #000;
+        box-shadow: none;
+    }
+    
+    .pagination .page-item.active .page-link {
+        background: #000;
+        color: #fff;
+    }
+}

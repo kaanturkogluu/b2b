@@ -17,19 +17,40 @@ class BakimFactory extends Factory
      */
     public function definition(): array
     {
+        $bakimDurumu = $this->faker->randomElement(['Devam Ediyor', 'Tamamlandı']);
+        $odemeDurumu = $bakimDurumu === 'Tamamlandı' ? $this->faker->randomElement([0, 1]) : 0;
+        
+        // Mevcut kullanıcıları al
+        $userIds = User::pluck('id')->toArray();
+        $adminId = $userIds[0] ?? 1; // İlk kullanıcıyı admin olarak kullan
+        
         return [
             'plaka' => $this->faker->regexify('[0-9]{2}[A-Z]{3}[0-9]{3}'),
             'sase' => $this->faker->regexify('[A-Z0-9]{17}'),
             'tahmini_teslim_tarihi' => $this->faker->dateTimeBetween('now', '+30 days'),
-            'telefon_numarasi' => $this->faker->phoneNumber(),
+            'telefon_numarasi' => $this->faker->numerify('05## ### ## ##'),
             'musteri_adi' => $this->faker->name(),
-            'odeme_durumu' => $this->faker->randomElement([0, 1]),
-            'bakim_durumu' => $this->faker->randomElement(['Devam Ediyor', 'Tamamlandı']),
-            'ucret' => $this->faker->randomFloat(2, 100, 5000),
-            'genel_aciklama' => $this->faker->sentence(),
-            'admin_id' => User::factory(),
-            'bakim_tarihi' => $this->faker->dateTimeBetween('-30 days', 'now'),
-            'personel_id' => User::factory()->create(['role' => 'personel'])->id,
+            'odeme_durumu' => $odemeDurumu,
+            'bakim_durumu' => $bakimDurumu,
+            'ucret' => $this->faker->randomFloat(2, 150, 3500),
+            'genel_aciklama' => $this->faker->randomElement([
+                'Motor bakımı',
+                'Fren sistemi kontrolü',
+                'Yağ değişimi',
+                'Lastik değişimi',
+                'Elektrik sistemi kontrolü',
+                'Klima bakımı',
+                'Egzoz sistemi kontrolü',
+                'Şanzıman bakımı',
+                'Süspansiyon kontrolü',
+                'Genel kontrol'
+            ]),
+            'admin_id' => $adminId,
+            'bakim_tarihi' => $this->faker->dateTimeBetween('-15 days', 'now'),
+            'personel_id' => null, // Personel atanmamış
+            'tamamlayan_personel_id' => $bakimDurumu === 'Tamamlandı' && count($userIds) > 1 ? $this->faker->randomElement($userIds) : null,
+            'tamamlanma_tarihi' => $bakimDurumu === 'Tamamlandı' ? $this->faker->dateTimeBetween('-10 days', 'now') : null,
+            'tamamlanma_notu' => $bakimDurumu === 'Tamamlandı' ? $this->faker->sentence() : null,
         ];
     }
 }

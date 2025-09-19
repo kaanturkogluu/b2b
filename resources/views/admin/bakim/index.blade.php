@@ -81,9 +81,10 @@
             background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
             color: white;
         }
+        
     </style>
 </head>
-<body>
+<body class="theme-admin">
     <div class="container-fluid">
         <div class="row">
             <!-- Sidebar -->
@@ -227,18 +228,7 @@
                                                     </select>
                                                 </div>
                                                 
-                                                <!-- Personel -->
-                                                <div class="col-md-2">
-                                                    <label class="form-label">Personel</label>
-                                                    <select name="personel_id" class="form-select">
-                                                        <option value="">Tüm Personeller</option>
-                                                        @foreach($personeller as $personel)
-                                                            <option value="{{ $personel->id }}" {{ request('personel_id') == $personel->id ? 'selected' : '' }}>
-                                                                {{ $personel->name }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
+                                                <!-- Personel filtreleme kaldırıldı -->
                                                 
                                                 <!-- Sıralama -->
                                                 <div class="col-md-2">
@@ -323,7 +313,7 @@
                                             <th>Bakım Durumu</th>
                                             <th>Ödeme Durumu</th>
                                             <th>Ücret</th>
-                                            <th>Personel</th>
+                                            <th>Tamamlayan Personel</th>
                                             <th>Bakım Notu</th>
                                             <th>Bakım Tarihi</th>
                                             <th>İşlemler</th>
@@ -348,7 +338,9 @@
                                                     @endif
                                                 </td>
                                                 <td>
-                                                    @if($bakim->odeme_durumu == 0)
+                                                    @if($bakim->bakim_durumu == 'Devam Ediyor')
+                                                        <span class="badge bg-warning">Bakım Devam Ediyor</span>
+                                                    @elseif($bakim->odeme_durumu == 0)
                                                         <span class="badge badge-odeme-bekliyor">Ödeme Bekliyor</span>
                                                     @else
                                                         <span class="badge badge-odeme-alindi">Ödeme Alındı</span>
@@ -357,7 +349,7 @@
                                                 <td>
                                                     <strong>{{ number_format($bakim->ucret, 2) }} ₺</strong>
                                                 </td>
-                                                <td>{{ $bakim->personel->name ?? '-' }}</td>
+                                                <td>{{ $bakim->tamamlayanPersonel->name ?? '-' }}</td>
                                                 <td>
                                                     @if($bakim->tamamlanma_notu)
                                                         <span class="badge bg-info" 
@@ -384,6 +376,7 @@
                                                            title="Düzenle">
                                                             <i class="fas fa-edit"></i>
                                                         </a>
+                                                     
                                                         <form method="POST" 
                                                               action="{{ route('bakim.destroy', $bakim) }}" 
                                                               class="d-inline"
@@ -419,8 +412,18 @@
 
                             <!-- Pagination -->
                             @if($bakimlar->hasPages())
-                                <div class="d-flex justify-content-center">
-                                    {{ $bakimlar->appends(request()->query())->links() }}
+                                <div class="pagination-container">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="pagination-info">
+                                            <small class="text-muted">
+                                                Toplam {{ $bakimlar->total() }} kayıttan 
+                                                {{ $bakimlar->firstItem() ?? 0 }}-{{ $bakimlar->lastItem() ?? 0 }} arası gösteriliyor
+                                            </small>
+                                        </div>
+                                        <div class="pagination-links">
+                                            {{ $bakimlar->appends(request()->query())->links() }}
+                                        </div>
+                                    </div>
                                 </div>
                             @endif
                         </div>
@@ -449,7 +452,7 @@
         
         // Auto-submit form on select change
         document.addEventListener('DOMContentLoaded', function() {
-            const selects = document.querySelectorAll('select[name="bakim_durumu"], select[name="odeme_durumu"], select[name="personel_id"], select[name="sort_by"]');
+            const selects = document.querySelectorAll('select[name="bakim_durumu"], select[name="odeme_durumu"], select[name="sort_by"]');
             selects.forEach(select => {
                 select.addEventListener('change', function() {
                     this.form.submit();

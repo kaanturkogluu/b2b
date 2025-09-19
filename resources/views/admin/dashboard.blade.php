@@ -195,12 +195,18 @@
                                                 <span class="badge 
                                                     @if($activity->type == 'bakim_created') bg-primary
                                                     @elseif($activity->type == 'bakim_completed') bg-success
+                                                    @elseif($activity->type == 'bakim_deleted') bg-danger
                                                     @elseif($activity->type == 'user_created') bg-info
+                                                    @elseif($activity->type == 'user_deleted') bg-warning
+                                                    @elseif($activity->type == 'payment_approved') bg-success
                                                     @else bg-secondary
                                                     @endif">
                                                     @if($activity->type == 'bakim_created') Yeni Servis
                                                     @elseif($activity->type == 'bakim_completed') Tamamlandı
-                                                    @elseif($activity->type == 'user_created') Kullanıcı
+                                                    @elseif($activity->type == 'bakim_deleted') Servis Silindi
+                                                    @elseif($activity->type == 'user_created') Kullanıcı Oluşturuldu
+                                                    @elseif($activity->type == 'user_deleted') Kullanıcı Silindi
+                                                    @elseif($activity->type == 'payment_approved') Ödeme Onaylandı
                                                     @else Aktivite
                                                     @endif
                                                 </span>

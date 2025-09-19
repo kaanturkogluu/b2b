@@ -355,20 +355,8 @@
                                         </a>
                                         
                                         @if($bakim->odeme_durumu == 0)
-                                            <form method="POST" action="{{ route('bakim.update', $bakim) }}" class="d-inline">
+                                            <form method="POST" action="{{ route('bakim.approve-payment', $bakim) }}" class="d-inline">
                                                 @csrf
-                                                @method('PUT')
-                                                <input type="hidden" name="odeme_durumu" value="1">
-                                                <input type="hidden" name="plaka" value="{{ $bakim->plaka }}">
-                                                <input type="hidden" name="sase" value="{{ $bakim->sase }}">
-                                                <input type="hidden" name="tahmini_teslim_tarihi" value="{{ $bakim->tahmini_teslim_tarihi->format('Y-m-d\TH:i') }}">
-                                                <input type="hidden" name="telefon_numarasi" value="{{ $bakim->telefon_numarasi }}">
-                                                <input type="hidden" name="musteri_adi" value="{{ $bakim->musteri_adi }}">
-                                                <input type="hidden" name="bakim_durumu" value="{{ $bakim->bakim_durumu }}">
-                                                <input type="hidden" name="ucret" value="{{ $bakim->ucret }}">
-                                                <input type="hidden" name="genel_aciklama" value="{{ $bakim->genel_aciklama }}">
-                                                <input type="hidden" name="bakim_tarihi" value="{{ $bakim->bakim_tarihi->format('Y-m-d\TH:i') }}">
-                                                <input type="hidden" name="personel_id" value="{{ $bakim->personel_id }}">
                                                 <button type="submit" class="btn btn-success w-100" onclick="return confirm('Ödeme alındı olarak işaretlemek istediğinizden emin misiniz?')">
                                                     <i class="fas fa-check me-2"></i>
                                                     Ödeme Alındı

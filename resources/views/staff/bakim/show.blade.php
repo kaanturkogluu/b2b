@@ -194,15 +194,7 @@
                                                     <i class="fas fa-money-bill me-2"></i>
                                                     Ücret Bilgileri
                                                 </h6>
-                                                <p class="mb-1"><strong>Toplam Ücret:</strong> {{ number_format($bakim->ucret, 2) }} ₺</p>
-                                                <p class="mb-0">
-                                                    <strong>Ödeme Durumu:</strong>
-                                                    @if($bakim->odeme_durumu == 0)
-                                                        <span class="badge badge-odeme-bekliyor">Ödeme Bekliyor</span>
-                                                    @else
-                                                        <span class="badge badge-odeme-alindi">Ödeme Alındı</span>
-                                                    @endif
-                                                </p>
+                                                <p class="mb-0"><strong>Toplam Ücret:</strong> {{ number_format($bakim->ucret, 2) }} ₺</p>
                                             </div>
                                         </div>
                                     </div>
@@ -220,15 +212,15 @@
                             </div>
 
                             <!-- Değişecek Parçalar -->
-                            @if($bakim->degisecekParcalar->count() > 0)
-                                <div class="card mb-4">
-                                    <div class="card-header">
-                                        <h5 class="mb-0">
-                                            <i class="fas fa-wrench me-2"></i>
-                                            Değişecek Parçalar
-                                        </h5>
-                                    </div>
-                                    <div class="card-body">
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-wrench me-2"></i>
+                                        Değişecek Parçalar
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    @if($bakim->degisecekParcalar->count() > 0)
                                         <div class="table-responsive">
                                             <table class="table table-hover">
                                                 <thead>
@@ -253,9 +245,15 @@
                                                 </tbody>
                                             </table>
                                         </div>
-                                    </div>
+                                    @else
+                                        <div class="text-center py-4">
+                                            <i class="fas fa-wrench fa-3x text-muted mb-3"></i>
+                                            <h6 class="text-muted">Değişecek Parça Bulunmuyor</h6>
+                                            <p class="text-muted mb-0">Bu bakım için değişecek parça kaydı bulunmamaktadır.</p>
+                                        </div>
+                                    @endif
                                 </div>
-                            @endif
+                            </div>
                         </div>
 
                         <!-- Durum ve İşlemler -->

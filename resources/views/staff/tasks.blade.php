@@ -96,7 +96,7 @@
         }
     </style>
 </head>
-<body>
+<body class="theme-staff">
     <div class="container-fluid">
         <div class="row">
             <!-- Sidebar -->
@@ -220,9 +220,11 @@
                                                         <p class="text-muted mb-1">{{ $task->musteri_adi }}</p>
                                                         <small class="text-muted">{{ $task->telefon_numarasi }}</small>
                                                     </div>
-                                                    <span class="badge {{ $task->bakim_durumu == 'Devam Ediyor' ? 'badge-devam' : 'badge-tamamlandi' }}">
-                                                        {{ $task->bakim_durumu }}
-                                                    </span>
+                                                    @if($task->bakim_durumu == 'Devam Ediyor')
+                                                        <span class="badge badge-devam">Devam Ediyor</span>
+                                                    @else
+                                                        <span class="badge badge-tamamlandi">Tamamlandı</span>
+                                                    @endif
                                                 </div>
                                                 
                                                 <div class="row mb-3">
@@ -247,9 +249,7 @@
                                                 
                                                 <div class="d-flex justify-content-between align-items-center">
                                                     <div>
-                                                        <span class="badge {{ $task->odeme_durumu == 0 ? 'badge-odeme-bekliyor' : 'badge-odeme-alindi' }}">
-                                                            {{ $task->odeme_durumu == 0 ? 'Ödeme Bekliyor' : 'Ödeme Alındı' }}
-                                                        </span>
+                                                        <!-- Ödeme durumu personel için gizlendi -->
                                                     </div>
                                                     <div>
                                                         <strong class="text-success">{{ number_format($task->ucret, 2) }} ₺</strong>
@@ -284,8 +284,18 @@
 
                             <!-- Pagination -->
                             @if($tasks->hasPages())
-                                <div class="d-flex justify-content-center">
-                                    {{ $tasks->appends(request()->query())->links() }}
+                                <div class="pagination-container">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="pagination-info">
+                                            <small class="text-muted">
+                                                Toplam {{ $tasks->total() }} kayıttan 
+                                                {{ $tasks->firstItem() ?? 0 }}-{{ $tasks->lastItem() ?? 0 }} arası gösteriliyor
+                                            </small>
+                                        </div>
+                                        <div class="pagination-links">
+                                            {{ $tasks->appends(request()->query())->links() }}
+                                        </div>
+                                    </div>
                                 </div>
                             @endif
                         </div>

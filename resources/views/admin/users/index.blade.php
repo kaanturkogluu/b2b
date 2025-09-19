@@ -79,7 +79,7 @@
         }
     </style>
 </head>
-<body>
+<body class="theme-admin">
     <div class="container-fluid">
         <div class="row">
             <!-- Sidebar -->
@@ -292,8 +292,18 @@
 
                             <!-- Pagination -->
                             @if($users->hasPages())
-                                <div class="d-flex justify-content-center">
-                                    {{ $users->appends(request()->query())->links() }}
+                                <div class="pagination-container">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="pagination-info">
+                                            <small class="text-muted">
+                                                Toplam {{ $users->total() }} kayıttan 
+                                                {{ $users->firstItem() ?? 0 }}-{{ $users->lastItem() ?? 0 }} arası gösteriliyor
+                                            </small>
+                                        </div>
+                                        <div class="pagination-links">
+                                            {{ $users->appends(request()->query())->links() }}
+                                        </div>
+                                    </div>
                                 </div>
                             @endif
                         </div>

@@ -15,43 +15,37 @@ class StaffController extends Controller
     {
         $user = Auth::user();
         
-        // Cache key oluştur
-        $cacheKey = 'staff_dashboard_' . $user->id;
+        // Optimize edilmiş sorgular - tek sorguda tüm veriler
+        $stats = DB::table('bakim')
+            ->where('tamamlayan_personel_id', $user->id)
+            ->selectRaw('
+                COUNT(*) as total_services,
+                SUM(CASE WHEN bakim_durumu = "Devam Ediyor" THEN 1 ELSE 0 END) as active_tasks,
+                SUM(CASE WHEN bakim_durumu = "Tamamlandı" THEN 1 ELSE 0 END) as completed_tasks,
+                SUM(CASE WHEN DATE(bakim_tarihi) = CURDATE() THEN 1 ELSE 0 END) as today_services
+            ')
+            ->first();
         
-        // Cache'den veri al veya veritabanından çek
-        $data = cache()->remember($cacheKey, 600, function() use ($user) { // 10 dakika cache
-            // Optimize edilmiş sorgular - tek sorguda tüm veriler
-            $stats = DB::table('bakim')
-                ->where('personel_id', $user->id)
-                ->selectRaw('
-                    COUNT(*) as total_services,
-                    SUM(CASE WHEN bakim_durumu = "Devam Ediyor" THEN 1 ELSE 0 END) as active_tasks,
-                    SUM(CASE WHEN bakim_durumu = "Tamamlandı" THEN 1 ELSE 0 END) as completed_tasks,
-                    SUM(CASE WHEN DATE(bakim_tarihi) = CURDATE() THEN 1 ELSE 0 END) as today_services
-                ')
-                ->first();
-            
-            // Bugünkü görevler - optimize edilmiş sorgu
-            $todayTasks = Bakim::select('id', 'plaka', 'musteri_adi', 'bakim_tarihi', 'bakim_durumu')
-                ->where('personel_id', $user->id)
-                ->whereDate('bakim_tarihi', now()->toDateString())
-                ->orderBy('bakim_tarihi')
-                ->get();
-            
-            // Yaklaşan görevler - optimize edilmiş sorgu
-            $upcomingTasks = Bakim::select('id', 'plaka', 'musteri_adi', 'bakim_tarihi', 'bakim_durumu')
-                ->where('personel_id', $user->id)
-                ->where('bakim_tarihi', '>', now()->endOfDay())
-                ->where('bakim_tarihi', '<=', now()->addDays(7))
-                ->orderBy('bakim_tarihi')
-                ->get();
-            
-            return [
-                'stats' => (array) $stats,
-                'todayTasks' => $todayTasks,
-                'upcomingTasks' => $upcomingTasks
-            ];
-        });
+        // Bugünkü görevler - optimize edilmiş sorgu, son eklenenler ilk görünsün
+        $todayTasks = Bakim::select('id', 'plaka', 'musteri_adi', 'bakim_tarihi', 'bakim_durumu')
+            ->where('tamamlayan_personel_id', $user->id)
+            ->whereDate('bakim_tarihi', now()->toDateString())
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
+        // Yaklaşan görevler - optimize edilmiş sorgu, son eklenenler ilk görünsün
+        $upcomingTasks = Bakim::select('id', 'plaka', 'musteri_adi', 'bakim_tarihi', 'bakim_durumu')
+            ->where('tamamlayan_personel_id', $user->id)
+            ->where('bakim_tarihi', '>', now()->endOfDay())
+            ->where('bakim_tarihi', '<=', now()->addDays(7))
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
+        $data = [
+            'stats' => (array) $stats,
+            'todayTasks' => $todayTasks,
+            'upcomingTasks' => $upcomingTasks
+        ];
         
         return view('staff.dashboard', compact('user', 'data'));
     }
@@ -79,9 +73,9 @@ class StaffController extends Controller
     {
         $user = Auth::user();
         
-        // Personelin tüm görevleri
+        // Personelin tüm görevleri - son eklenenler ilk görünsün
         $tasks = Bakim::where('personel_id', $user->id)
-                     ->orderBy('bakim_tarihi', 'desc')
+                     ->orderBy('created_at', 'desc')
                      ->paginate(10);
         
         return view('staff.tasks', compact('user', 'tasks'));
@@ -91,12 +85,12 @@ class StaffController extends Controller
     {
         $user = Auth::user();
         
-        // Personelin zaman çizelgesi
+        // Personelin zaman çizelgesi - son eklenenler ilk görünsün
         $timeline = Bakim::where('personel_id', $user->id)
-                        ->orderBy('bakim_tarihi', 'desc')
+                        ->orderBy('created_at', 'desc')
                         ->get()
                         ->groupBy(function($item) {
-                            return $item->bakim_tarihi->format('Y-m-d');
+                            return $item->created_at->format('Y-m-d');
                         });
         
         return view('staff.timeline', compact('user', 'timeline'));
@@ -135,6 +129,7 @@ class StaffController extends Controller
             ]
         );
 
+
         return redirect()->route('staff.bakim.index')
                         ->with('success', 'Bakım başarıyla onaylandı!');
     }
@@ -157,4 +152,5 @@ class StaffController extends Controller
         
         return round($totalHours / $completedServices->count(), 1);
     }
+
 }

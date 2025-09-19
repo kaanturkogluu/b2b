@@ -28,6 +28,7 @@ Route::middleware(['web', 'auth'])->group(function () {
         Route::resource('bakim', \App\Http\Controllers\BakimController::class);
         Route::get('/bakim/{bakim}/print', [\App\Http\Controllers\BakimController::class, 'print'])->name('bakim.print');
         Route::get('/bakim/export/excel', [\App\Http\Controllers\BakimController::class, 'exportExcel'])->name('bakim.export.excel');
+        Route::post('/bakim/{bakim}/approve-payment', [\App\Http\Controllers\BakimController::class, 'approvePayment'])->name('bakim.approve-payment');
         
         // Invoice Settings Routes
         Route::get('/invoice-settings', [\App\Http\Controllers\InvoiceSettingsController::class, 'index'])->name('invoice-settings.index');
