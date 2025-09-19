@@ -351,10 +351,11 @@ class BakimController extends Controller
                 );
             }
 
-            // Parçaları güncelle (mevcut parçaları koru, sadece güncelle veya yeni ekle)
+            // Parçaları güncelle (silme, güncelleme ve ekleme işlemleri)
             if ($request->has('parcalar')) {
                 $existingParcalar = $bakim->degisecekParcalar->keyBy('id');
                 $submittedParcalar = collect($request->parcalar);
+                $submittedParcaIds = [];
                 
                 // Mevcut parçaları güncelle veya yeni ekle
                 foreach ($submittedParcalar as $index => $parca) {
@@ -373,14 +374,22 @@ class BakimController extends Controller
                         // Eğer parça ID'si varsa güncelle, yoksa yeni oluştur
                         if (isset($parca['id']) && $existingParcalar->has($parca['id'])) {
                             $existingParcalar[$parca['id']]->update($parcaData);
+                            $submittedParcaIds[] = $parca['id'];
                         } else {
-                            DegisecekParca::create(array_merge($parcaData, ['bakim_id' => $bakim->id]));
+                            $newParca = DegisecekParca::create(array_merge($parcaData, ['bakim_id' => $bakim->id]));
+                            $submittedParcaIds[] = $newParca->id;
                         }
                     }
                 }
                 
-                // Not: Parçalar silinmez, sadece güncellenir veya yeni eklenir
-                // Bu sayede ödeme alındıktan sonra da parça bilgileri korunur
+                // Form'da gönderilmeyen parçaları sil
+                $parcalarToDelete = $existingParcalar->keys()->diff($submittedParcaIds);
+                foreach ($parcalarToDelete as $parcaId) {
+                    $existingParcalar[$parcaId]->delete();
+                }
+            } else {
+                // Eğer hiç parça gönderilmemişse tüm parçaları sil
+                $bakim->degisecekParcalar()->delete();
             }
 
 
