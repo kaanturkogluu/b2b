@@ -29,6 +29,13 @@
             padding: 2rem;
             text-align: center;
         }
+        .login-header img {
+            filter: brightness(0) invert(1);
+            transition: all 0.3s ease;
+        }
+        .login-header img:hover {
+            transform: scale(1.05);
+        }
         .login-body {
             padding: 2rem;
         }
@@ -80,7 +87,7 @@
             <div class="col-md-6">
                 <div class="login-card">
                     <div class="login-header">
-                        <i class="fas fa-motorcycle fa-3x mb-3"></i>
+                        <img src="{{ asset('images/logo.png') }}" alt="MotoJet Servis Logo" class="mb-3" style="height: 80px; width: auto;">
                         <h3 class="mb-0">MotoJet Servis</h3>
                         <p class="mb-0">Sisteme Giriş Yapın</p>
                     </div>
