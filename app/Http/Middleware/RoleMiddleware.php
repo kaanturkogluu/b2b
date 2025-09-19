@@ -23,11 +23,21 @@ class RoleMiddleware
         $user = Auth::user();
         
         if ($role === 'admin' && !$user->isAdmin()) {
-            abort(403, 'Bu sayfaya erişim yetkiniz yok.');
+            // Admin sayfasına erişimi olmayan kullanıcıları kendi dashboard'larına yönlendir
+            if ($user->isStaff()) {
+                return redirect()->route('staff.dashboard')->with('error', 'Bu sayfaya erişim yetkiniz yok. Personel paneline yönlendirildiniz.');
+            } else {
+                return redirect()->route('dashboard')->with('error', 'Bu sayfaya erişim yetkiniz yok.');
+            }
         }
         
         if ($role === 'staff' && !$user->isStaff()) {
-            abort(403, 'Bu sayfaya erişim yetkiniz yok.');
+            // Staff sayfasına erişimi olmayan kullanıcıları kendi dashboard'larına yönlendir
+            if ($user->isAdmin()) {
+                return redirect()->route('dashboard')->with('error', 'Bu sayfaya erişim yetkiniz yok. Admin paneline yönlendirildiniz.');
+            } else {
+                return redirect()->route('dashboard')->with('error', 'Bu sayfaya erişim yetkiniz yok.');
+            }
         }
 
         return $next($request);

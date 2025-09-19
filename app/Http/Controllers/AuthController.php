@@ -16,7 +16,16 @@ class AuthController extends Controller
     public function showLogin()
     {
         if (Auth::check()) {
-            return redirect()->route('dashboard');
+            $user = Auth::user();
+            
+            // Kullanıcı tipine göre uygun dashboard'a yönlendir
+            if ($user->isAdmin()) {
+                return redirect()->route('dashboard');
+            } elseif ($user->isStaff()) {
+                return redirect()->route('staff.dashboard');
+            } else {
+                return redirect()->route('dashboard');
+            }
         }
         
         return view('auth.login');
@@ -43,7 +52,16 @@ class AuthController extends Controller
         if (Auth::attempt($credentials, $request->filled('remember'))) {
             $request->session()->regenerate();
             
-            return redirect()->intended(route('dashboard'));
+            $user = Auth::user();
+            
+            // Kullanıcı tipine göre uygun dashboard'a yönlendir
+            if ($user->isAdmin()) {
+                return redirect()->intended(route('dashboard'));
+            } elseif ($user->isStaff()) {
+                return redirect()->intended(route('staff.dashboard'));
+            } else {
+                return redirect()->intended(route('dashboard'));
+            }
         }
 
         return back()->withErrors([
@@ -80,9 +98,11 @@ class AuthController extends Controller
             
             return view('admin.dashboard', compact('user', 'recentActivities'));
         } elseif ($user->isStaff()) {
-            return view('staff.dashboard', compact('user'));
+            // Staff kullanıcıları staff dashboard'a yönlendir
+            return redirect()->route('staff.dashboard');
         }
         
-        return redirect()->route('login');
+        // Bilinmeyen rol durumunda login'e yönlendir
+        return redirect()->route('login')->with('error', 'Geçersiz kullanıcı rolü.');
     }
 }

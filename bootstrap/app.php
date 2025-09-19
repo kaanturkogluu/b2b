@@ -14,11 +14,13 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
             'performance' => \App\Http\Middleware\PerformanceMonitoringMiddleware::class,
+            'handle.notfound' => \App\Http\Middleware\HandleNotFoundMiddleware::class,
         ]);
         
         // Global middleware
         $middleware->web(append: [
             \App\Http\Middleware\PerformanceMonitoringMiddleware::class,
+            \App\Http\Middleware\HandleNotFoundMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
