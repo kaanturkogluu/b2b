@@ -20,7 +20,7 @@ class BakimController extends Controller
     {
         $query = Bakim::select([
             'id', 'plaka', 'sase', 'musteri_adi', 'telefon_numarasi', 
-            'bakim_durumu', 'odeme_durumu', 'ucret', 'genel_aciklama',
+            'bakim_durumu', 'odeme_durumu', 'ucret', 'iscilik_ucreti', 'genel_aciklama',
             'admin_id', 'personel_id', 'tamamlayan_personel_id', 
             'bakim_tarihi', 'tahmini_teslim_tarihi', 'created_at'
         ])
@@ -190,6 +190,7 @@ class BakimController extends Controller
             'telefon_numarasi' => 'required|string|max:255',
             'musteri_adi' => 'required|string|max:255',
             'ucret' => 'required|numeric|min:0',
+            'iscilik_ucreti' => 'nullable|numeric|min:0',
             'genel_aciklama' => 'nullable|string|max:255',
             'bakim_tarihi' => 'required|date',
             'parcalar' => 'nullable|array',
@@ -210,6 +211,7 @@ class BakimController extends Controller
                 'odeme_durumu' => 0,
                 'bakim_durumu' => 'Devam Ediyor',
                 'ucret' => $request->ucret,
+                'iscilik_ucreti' => $request->iscilik_ucreti ?? 0,
                 'genel_aciklama' => $request->genel_aciklama ?? 'Beklemede',
                 'admin_id' => Auth::id(),
                 'bakim_tarihi' => $request->bakim_tarihi,
@@ -294,6 +296,7 @@ class BakimController extends Controller
             'odeme_durumu' => 'required|integer|in:0,1',
             'bakim_durumu' => 'required|in:Devam Ediyor,Tamamlandı',
             'ucret' => 'required|numeric|min:0',
+            'iscilik_ucreti' => 'nullable|numeric|min:0',
             'genel_aciklama' => 'nullable|string|max:255',
             'bakim_tarihi' => 'required|date',
             // personel_id kaldırıldı - sadece tamamlayan personel kaydedilir
@@ -318,6 +321,7 @@ class BakimController extends Controller
                 'odeme_durumu' => $request->odeme_durumu,
                 'bakim_durumu' => $request->bakim_durumu,
                 'ucret' => $request->ucret,
+                'iscilik_ucreti' => $request->iscilik_ucreti ?? 0,
                 'genel_aciklama' => $request->genel_aciklama,
                 'bakim_tarihi' => $request->bakim_tarihi,
                 // personel_id kaldırıldı

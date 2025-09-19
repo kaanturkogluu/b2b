@@ -22,6 +22,7 @@ class Bakim extends Model
         'odeme_durumu',
         'bakim_durumu',
         'ucret',
+        'iscilik_ucreti',
         'genel_aciklama',
         'admin_id',
         'bakim_tarihi',
@@ -36,7 +37,8 @@ class Bakim extends Model
         'bakim_tarihi' => 'datetime',
         'tamamlanma_tarihi' => 'datetime',
         'odeme_durumu' => 'integer',
-        'ucret' => 'decimal:2'
+        'ucret' => 'decimal:2',
+        'iscilik_ucreti' => 'decimal:2'
     ];
 
     public function admin(): BelongsTo

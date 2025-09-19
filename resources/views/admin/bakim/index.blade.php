@@ -312,7 +312,7 @@
                                             <th>Telefon</th>
                                             <th>Bakım Durumu</th>
                                             <th>Ödeme Durumu</th>
-                                            <th>Ücret</th>
+                                            <th>Toplam Ücret</th>
                                             <th>Tamamlayan Personel</th>
                                             <th>Bakım Notu</th>
                                             <th>Bakım Tarihi</th>
@@ -347,7 +347,15 @@
                                                     @endif
                                                 </td>
                                                 <td>
-                                                    <strong>{{ number_format($bakim->ucret, 2) }} ₺</strong>
+                                                    <div class="text-center">
+                                                        <strong>{{ number_format(($bakim->ucret ?? 0) + ($bakim->iscilik_ucreti ?? 0), 2) }} ₺</strong>
+                                                        @if($bakim->iscilik_ucreti > 0)
+                                                            <br><small class="text-muted">
+                                                                Parça: {{ number_format($bakim->ucret ?? 0, 2) }} ₺<br>
+                                                                İşçilik: {{ number_format($bakim->iscilik_ucreti ?? 0, 2) }} ₺
+                                                            </small>
+                                                        @endif
+                                                    </div>
                                                 </td>
                                                 <td>{{ $bakim->tamamlayanPersonel->name ?? '-' }}</td>
                                                 <td>

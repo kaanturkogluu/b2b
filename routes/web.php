@@ -39,6 +39,11 @@ Route::middleware(['web', 'auth'])->group(function () {
         Route::get('/reports/service-report', [\App\Http\Controllers\ReportsController::class, 'serviceReport'])->name('reports.service-report');
         // Mali rapor ve personel raporu route'ları kaldırıldı - sistem yükseltmesi gerekli
         
+        // API Import Routes
+        Route::get('/api-import', [\App\Http\Controllers\ApiImportController::class, 'index'])->name('api-import.index');
+        Route::get('/api-import/fetch', [\App\Http\Controllers\ApiImportController::class, 'fetchData'])->name('api-import.fetch');
+        Route::post('/api-import/import', [\App\Http\Controllers\ApiImportController::class, 'importData'])->name('api-import.import');
+        
     });
     
     // Staff Routes

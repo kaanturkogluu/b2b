@@ -292,9 +292,19 @@
     @endif
 
     <div class="total-section">
+        @if($bakim->degisecekParcalar->count() > 0)
+            <div class="total-row">
+                <span class="total-label">Parça Toplamı:</span>
+                <span class="total-value">{{ number_format($bakim->degisecekParcalar->sum(function($parca) { return $parca->adet * $parca->birim_fiyat; }), 2) }} ₺</span>
+            </div>
+        @endif
+        <div class="total-row">
+            <span class="total-label">İşçilik Ücreti:</span>
+            <span class="total-value">{{ number_format($bakim->iscilik_ucreti ?? 0, 2) }} ₺</span>
+        </div>
         <div class="total-row grand-total">
             <span class="total-label">TOPLAM TUTAR:</span>
-            <span class="total-value">{{ number_format($bakim->ucret, 2) }} ₺</span>
+            <span class="total-value">{{ number_format(($bakim->ucret ?? 0) + ($bakim->iscilik_ucreti ?? 0), 2) }} ₺</span>
         </div>
     </div>
 

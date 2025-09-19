@@ -119,14 +119,23 @@ class ReportsController extends Controller
      */
     private function calculateStats($bakimlar)
     {
+        $totalRevenue = $bakimlar->sum(function($bakim) {
+            return ($bakim->ucret ?? 0) + ($bakim->iscilik_ucreti ?? 0);
+        });
+        
+        $avgServiceValue = $bakimlar->count() > 0 ? 
+            $bakimlar->avg(function($bakim) {
+                return ($bakim->ucret ?? 0) + ($bakim->iscilik_ucreti ?? 0);
+            }) : 0;
+
         return [
             'total_services' => $bakimlar->count(),
             'completed_services' => $bakimlar->where('bakim_durumu', 'Tamamlandı')->count(),
             'ongoing_services' => $bakimlar->where('bakim_durumu', 'Devam Ediyor')->count(),
             'paid_services' => $bakimlar->where('odeme_durumu', 1)->count(),
             'unpaid_services' => $bakimlar->where('odeme_durumu', 0)->count(),
-            'total_revenue' => $bakimlar->sum('ucret'),
-            'avg_service_value' => $bakimlar->count() > 0 ? $bakimlar->avg('ucret') : 0,
+            'total_revenue' => $totalRevenue,
+            'avg_service_value' => $avgServiceValue,
             'completion_rate' => $bakimlar->count() > 0 ? 
                 round(($bakimlar->where('bakim_durumu', 'Tamamlandı')->count() / $bakimlar->count()) * 100, 2) : 0,
             'payment_rate' => $bakimlar->count() > 0 ? 
@@ -139,18 +148,30 @@ class ReportsController extends Controller
      */
     private function calculateFinancialStats($bakimlar)
     {
-        $totalRevenue = $bakimlar->sum('ucret');
-        $paidRevenue = $bakimlar->where('odeme_durumu', 1)->sum('ucret');
-        $unpaidRevenue = $bakimlar->where('odeme_durumu', 0)->sum('ucret');
+        $totalRevenue = $bakimlar->sum(function($bakim) {
+            return ($bakim->ucret ?? 0) + ($bakim->iscilik_ucreti ?? 0);
+        });
+        
+        $paidRevenue = $bakimlar->where('odeme_durumu', 1)->sum(function($bakim) {
+            return ($bakim->ucret ?? 0) + ($bakim->iscilik_ucreti ?? 0);
+        });
+        
+        $unpaidRevenue = $bakimlar->where('odeme_durumu', 0)->sum(function($bakim) {
+            return ($bakim->ucret ?? 0) + ($bakim->iscilik_ucreti ?? 0);
+        });
+
+        $serviceValues = $bakimlar->map(function($bakim) {
+            return ($bakim->ucret ?? 0) + ($bakim->iscilik_ucreti ?? 0);
+        });
 
         return [
             'total_revenue' => $totalRevenue,
             'paid_revenue' => $paidRevenue,
             'unpaid_revenue' => $unpaidRevenue,
             'payment_rate' => $totalRevenue > 0 ? round(($paidRevenue / $totalRevenue) * 100, 2) : 0,
-            'avg_service_value' => $bakimlar->count() > 0 ? $bakimlar->avg('ucret') : 0,
-            'highest_service_value' => $bakimlar->max('ucret'),
-            'lowest_service_value' => $bakimlar->min('ucret'),
+            'avg_service_value' => $bakimlar->count() > 0 ? $serviceValues->avg() : 0,
+            'highest_service_value' => $serviceValues->max(),
+            'lowest_service_value' => $serviceValues->min(),
             'monthly_trend' => $this->getMonthlyTrend($bakimlar)
         ];
     }
@@ -165,7 +186,9 @@ class ReportsController extends Controller
         })->map(function ($group) {
             return [
                 'count' => $group->count(),
-                'revenue' => $group->sum('ucret')
+                'revenue' => $group->sum(function($bakim) {
+                    return ($bakim->ucret ?? 0) + ($bakim->iscilik_ucreti ?? 0);
+                })
             ];
         });
     }

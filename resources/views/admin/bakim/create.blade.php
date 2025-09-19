@@ -263,8 +263,8 @@
 
                                 <!-- Ücret ve Açıklama -->
                                 <div class="row mb-4">
-                                    <div class="col-md-6">
-                                        <label for="ucret" class="form-label">Toplam Ücret (₺)</label>
+                                    <div class="col-md-4">
+                                        <label for="ucret" class="form-label">Parça Ücreti (₺)</label>
                                         <input type="text" 
                                                class="form-control" 
                                                id="ucret_display" 
@@ -275,9 +275,24 @@
                                                id="ucret" 
                                                name="ucret" 
                                                value="0.00">
-                                        <small class="text-muted">Ücret otomatik olarak parça fiyatlarından hesaplanır</small>
+                                        <small class="text-muted">Parça fiyatlarından otomatik hesaplanır</small>
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="col-md-4">
+                                        <label for="iscilik_ucreti" class="form-label">İşçilik Ücreti (₺) <span class="text-muted">(Opsiyonel)</span></label>
+                                        <input type="number" 
+                                               step="0.01" 
+                                               class="form-control @error('iscilik_ucreti') is-invalid @enderror" 
+                                               id="iscilik_ucreti" 
+                                               name="iscilik_ucreti" 
+                                               value="{{ old('iscilik_ucreti', '0.00') }}"
+                                               placeholder="0.00"
+                                               onchange="calculateTotal()">
+                                        @error('iscilik_ucreti')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                        <small class="text-muted">İşçilik ücreti girin (opsiyonel)</small>
+                                    </div>
+                                    <div class="col-md-4">
                                         <label for="genel_aciklama" class="form-label">Genel Açıklama (Opsiyonel)</label>
                                         <input type="text" 
                                                class="form-control @error('genel_aciklama') is-invalid @enderror" 
@@ -288,6 +303,33 @@
                                         @error('genel_aciklama')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
+                                    </div>
+                                </div>
+
+                                <!-- Toplam Ücret Gösterimi -->
+                                <div class="row mb-4">
+                                    <div class="col-md-6">
+                                        <div class="alert alert-info">
+                                            <h6 class="mb-2">
+                                                <i class="fas fa-calculator me-2"></i>
+                                                Toplam Ücret Hesaplaması
+                                            </h6>
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <small>Parça Ücreti:</small><br>
+                                                    <strong id="parca_ucreti_display">0.00 ₺</strong>
+                                                </div>
+                                                <div class="col-6">
+                                                    <small>İşçilik Ücreti:</small><br>
+                                                    <strong id="iscilik_display">0.00 ₺</strong>
+                                                </div>
+                                            </div>
+                                            <hr class="my-2">
+                                            <div class="d-flex justify-content-between">
+                                                <strong>Toplam:</strong>
+                                                <strong id="toplam_ucret_display">0.00 ₺</strong>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -394,11 +436,12 @@
             calculateTotal();
         }
 
-        // Basit fiyat hesaplama
+        // Fiyat hesaplama (parça + işçilik)
         function calculateTotal() {
-            let total = 0;
+            let parcaTotal = 0;
             const parcaRows = document.querySelectorAll('.parca-row');
             
+            // Parça ücretlerini hesapla
             parcaRows.forEach(row => {
                 const parcaAdiInput = row.querySelector('input[name*="[parca_adi]"]');
                 const adetInput = row.querySelector('input[name*="[adet]"]');
@@ -412,14 +455,27 @@
                     
                     // Boş alanları atla
                     if (parcaAdi && adet > 0) {
-                        total += adet * birimFiyat;
+                        parcaTotal += adet * birimFiyat;
                     }
                 }
             });
             
-            const formattedTotal = total.toFixed(2);
-            document.getElementById('ucret_display').value = formattedTotal;
-            document.getElementById('ucret').value = formattedTotal;
+            // İşçilik ücretini al
+            const iscilikUcreti = parseFloat(document.getElementById('iscilik_ucreti').value) || 0;
+            
+            // Toplam hesapla
+            const toplamUcret = parcaTotal + iscilikUcreti;
+            
+            // Değerleri güncelle
+            const formattedParcaTotal = parcaTotal.toFixed(2);
+            const formattedIscilik = iscilikUcreti.toFixed(2);
+            const formattedTotal = toplamUcret.toFixed(2);
+            
+            document.getElementById('ucret_display').value = formattedParcaTotal;
+            document.getElementById('ucret').value = formattedParcaTotal;
+            document.getElementById('parca_ucreti_display').textContent = formattedParcaTotal + ' ₺';
+            document.getElementById('iscilik_display').textContent = formattedIscilik + ' ₺';
+            document.getElementById('toplam_ucret_display').textContent = formattedTotal + ' ₺';
         }
 
         // Form submit öncesi kontrol
@@ -496,9 +552,10 @@
             document.getElementById('tahmini_teslim_tarihi').value = formattedDate;
         }
 
-        // Sayfa yüklendiğinde bir parça satırı ekle
+        // Sayfa yüklendiğinde bir parça satırı ekle ve hesaplama yap
         document.addEventListener('DOMContentLoaded', function() {
             addParca();
+            calculateTotal();
         });
     </script>
 </body>

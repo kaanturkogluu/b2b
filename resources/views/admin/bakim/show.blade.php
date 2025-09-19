@@ -274,7 +274,17 @@
                                                 <tfoot>
                                                     <tr class="table-primary">
                                                         <th colspan="3">Toplam Parça Tutarı</th>
-                                                        <th>{{ number_format($bakim->degisecekParcalar->sum('toplam_fiyat'), 2) }} ₺</th>
+                                                        <th>{{ number_format($bakim->degisecekParcalar->sum(function($parca) { return $parca->adet * $parca->birim_fiyat; }), 2) }} ₺</th>
+                                                        <th></th>
+                                                    </tr>
+                                                    <tr class="table-info">
+                                                        <th colspan="3">İşçilik Ücreti</th>
+                                                        <th>{{ number_format($bakim->iscilik_ucreti ?? 0, 2) }} ₺</th>
+                                                        <th></th>
+                                                    </tr>
+                                                    <tr class="table-success">
+                                                        <th colspan="3">GENEL TOPLAM</th>
+                                                        <th>{{ number_format(($bakim->ucret ?? 0) + ($bakim->iscilik_ucreti ?? 0), 2) }} ₺</th>
                                                         <th></th>
                                                     </tr>
                                                 </tfoot>
@@ -301,8 +311,16 @@
                                 </div>
                                 <div class="card-body">
                                     <div class="text-center mb-4">
-                                        <h3 class="text-primary">{{ number_format($bakim->ucret, 2) }} ₺</h3>
+                                        <h3 class="text-primary">{{ number_format(($bakim->ucret ?? 0) + ($bakim->iscilik_ucreti ?? 0), 2) }} ₺</h3>
                                         <p class="text-muted">Toplam Ücret</p>
+                                        @if($bakim->iscilik_ucreti > 0)
+                                            <div class="mt-2">
+                                                <small class="text-muted">
+                                                    Parça: {{ number_format($bakim->ucret ?? 0, 2) }} ₺ | 
+                                                    İşçilik: {{ number_format($bakim->iscilik_ucreti ?? 0, 2) }} ₺
+                                                </small>
+                                            </div>
+                                        @endif
                                     </div>
                                     
                                     <div class="mb-3">
