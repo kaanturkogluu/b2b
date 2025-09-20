@@ -1,171 +1,9 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Servis Yönetimi - MotoJet Servis</title>
-    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        body {
-            background-color: #f8f9fa;
-        }
-        .sidebar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            color: white;
-        }
-        .sidebar .nav-link {
-            color: rgba(255, 255, 255, 0.8);
-            padding: 12px 20px;
-            border-radius: 8px;
-            margin: 5px 0;
-            transition: all 0.3s ease;
-        }
-        .sidebar .nav-link:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-            color: white;
-        }
-        .sidebar .nav-link.active {
-            background-color: rgba(255, 255, 255, 0.2);
-            color: white;
-        }
-        .main-content {
-            padding: 2rem;
-        }
-        .card {
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-            transition: transform 0.3s ease;
-        }
-        .card:hover {
-            transform: translateY(-2px);
-        }
-        .header {
-            background: white;
-            padding: 1rem 2rem;
-            border-bottom: 1px solid #e9ecef;
-            margin-bottom: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            border-radius: 8px;
-        }
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-        .table th {
-            background-color: #f8f9fa;
-            border-top: none;
-            font-weight: 600;
-        }
-        .badge-devam {
-            background: linear-gradient(135deg, #ffc107 0%, #ff8c00 100%);
-            color: white;
-        }
-        .badge-tamamlandi {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            color: white;
-        }
-        .badge-odeme-bekliyor {
-            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-            color: white;
-        }
-        .badge-odeme-alindi {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            color: white;
-        }
-        
-    </style>
-</head>
-<body class="theme-admin">
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Sidebar -->
-            <div class="col-md-3 col-lg-2 sidebar">
-                <div class="p-3">
-                    <h4 class="text-center mb-4">
-                        <i class="fas fa-motorcycle me-2"></i>
-                        MotoJet Servis
-                    </h4>
-                    <nav class="nav flex-column">
-                        <a class="nav-link" href="{{ route('dashboard') }}">
-                            <i class="fas fa-tachometer-alt me-2"></i>
-                            Dashboard
-                        </a>
-                        <a class="nav-link active" href="{{ route('bakim.index') }}">
-                            <i class="fas fa-tools me-2"></i>
-                            Servis Yönetimi
-                        </a>
-                        
-                        @auth
-                            @if(auth()->user()->role === 'admin')
-                                <a class="nav-link" href="{{ route('users.index') }}">
-                                    <i class="fas fa-users me-2"></i>
-                                    Kullanıcı Yönetimi
-                                </a>
-                                <a class="nav-link" href="{{ route('reports.index') }}">
-                                    <i class="fas fa-chart-line me-2"></i>
-                                    Raporlar
-                                </a>
-                                <a class="nav-link" href="{{ route('invoice-settings.index') }}">
-                                    <i class="fas fa-file-invoice me-2"></i>
-                                    Fatura Ayarları
-                                </a>
-                            @elseif(auth()->user()->role === 'staff')
-                                <a class="nav-link" href="{{ route('staff.bakim.index') }}">
-                                    <i class="fas fa-list me-2"></i>
-                                    Servislerim
-                                </a>
-                            @endif
-                        @endauth
-                    </nav>
-                </div>
-            </div>
+@extends('layouts.admin')
 
-            <!-- Main Content -->
-            <div class="col-md-9 col-lg-10">
-                <div class="main-content">
-                    <!-- Header -->
-                    <div class="header d-flex justify-content-between align-items-center">
-                        <div>
-                            <h2 class="mb-0">Servis Yönetimi</h2>
-                            <p class="text-muted mb-0">Bakım servislerini yönetin</p>
-                        </div>
-                        <div class="d-flex align-items-center">
-                            <span class="badge bg-primary me-3">Admin</span>
-                            <form method="POST" action="{{ route('logout') }}" class="d-inline">
-                                @csrf
-                                <button type="submit" class="btn btn-outline-danger">
-                                    <i class="fas fa-sign-out-alt me-2"></i>
-                                    Çıkış Yap
-                                </button>
-                            </form>
-                        </div>
-                    </div>
+@section('page-title', 'Servis Yönetimi')
+@section('page-subtitle', 'Bakım servislerini yönetin')
 
-                    <!-- Flash Messages -->
-                    @if(session('success'))
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            <i class="fas fa-check-circle me-2"></i>
-                            {{ session('success') }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                    @endif
-
-                    @if(session('error'))
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            <i class="fas fa-exclamation-circle me-2"></i>
-                            {{ session('error') }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                    @endif
+@section('content')
 
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center">
@@ -195,7 +33,7 @@
                                         <form method="GET" action="{{ route('bakim.index') }}" id="filterForm">
                                             <div class="row g-3">
                                                 <!-- Arama -->
-                                                <div class="col-md-4">
+                                                <div class="col-12 col-md-4">
                                                     <label class="form-label">Arama</label>
                                                     <input type="text" 
                                                            name="search" 
@@ -205,7 +43,7 @@
                                                 </div>
                                                 
                                                 <!-- Bakım Durumu -->
-                                                <div class="col-md-2">
+                                                <div class="col-6 col-md-2">
                                                     <label class="form-label">Bakım Durumu</label>
                                                     <select name="bakim_durumu" class="form-select">
                                                         @foreach($filterOptions['bakim_durumu_options'] as $value => $label)
@@ -217,7 +55,7 @@
                                                 </div>
                                                 
                                                 <!-- Ödeme Durumu -->
-                                                <div class="col-md-2">
+                                                <div class="col-6 col-md-2">
                                                     <label class="form-label">Ödeme Durumu</label>
                                                     <select name="odeme_durumu" class="form-select">
                                                         @foreach($filterOptions['odeme_durumu_options'] as $value => $label)
@@ -228,10 +66,8 @@
                                                     </select>
                                                 </div>
                                                 
-                                                <!-- Personel filtreleme kaldırıldı -->
-                                                
                                                 <!-- Sıralama -->
-                                                <div class="col-md-2">
+                                                <div class="col-6 col-md-2">
                                                     <label class="form-label">Sıralama</label>
                                                     <select name="sort_by" class="form-select">
                                                         @foreach($filterOptions['sort_options'] as $value => $label)
@@ -243,7 +79,7 @@
                                                 </div>
                                                 
                                                 <!-- Tarih Aralığı -->
-                                                <div class="col-md-3">
+                                                <div class="col-6 col-md-3">
                                                     <label class="form-label">Başlangıç Tarihi</label>
                                                     <input type="date" 
                                                            name="start_date" 
@@ -251,7 +87,7 @@
                                                            value="{{ request('start_date') }}">
                                                 </div>
                                                 
-                                                <div class="col-md-3">
+                                                <div class="col-6 col-md-3">
                                                     <label class="form-label">Bitiş Tarihi</label>
                                                     <input type="date" 
                                                            name="end_date" 
@@ -260,7 +96,7 @@
                                                 </div>
                                                 
                                                 <!-- Ücret Aralığı -->
-                                                <div class="col-md-3">
+                                                <div class="col-6 col-md-3">
                                                     <label class="form-label">Min. Ücret (₺)</label>
                                                     <input type="number" 
                                                            name="min_ucret" 
@@ -269,7 +105,7 @@
                                                            value="{{ request('min_ucret') }}">
                                                 </div>
                                                 
-                                                <div class="col-md-3">
+                                                <div class="col-6 col-md-3">
                                                     <label class="form-label">Max. Ücret (₺)</label>
                                                     <input type="number" 
                                                            name="max_ucret" 
@@ -280,7 +116,7 @@
                                                 
                                                 <!-- Butonlar -->
                                                 <div class="col-12">
-                                                    <div class="d-flex gap-2">
+                                                    <div class="d-grid d-md-flex gap-2">
                                                         <button type="submit" class="btn btn-primary">
                                                             <i class="fas fa-search me-2"></i>
                                                             Filtrele
@@ -301,8 +137,8 @@
                                 </div>
                             </div>
 
-                            <!-- Services Table -->
-                            <div class="table-responsive">
+                            <!-- Services Table - Desktop -->
+                            <div class="table-responsive d-none d-md-block">
                                 <table class="table table-hover">
                                     <thead>
                                         <tr>
@@ -418,6 +254,110 @@
                                 </table>
                             </div>
 
+                            <!-- Services Cards - Mobile -->
+                            <div class="d-md-none">
+                                @forelse($bakimlar as $bakim)
+                                    <div class="card mb-3">
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <h6 class="mb-0">
+                                                <strong>{{ $bakim->plaka }}</strong>
+                                                <small class="text-muted">#{{ $bakim->id }}</small>
+                                            </h6>
+                                            <div class="btn-group" role="group">
+                                                <a href="{{ route('bakim.show', $bakim) }}" 
+                                                   class="btn btn-sm btn-outline-info" 
+                                                   title="Görüntüle">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="{{ route('bakim.edit', $bakim) }}" 
+                                                   class="btn btn-sm btn-outline-warning" 
+                                                   title="Düzenle">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <form method="POST" 
+                                                      action="{{ route('bakim.destroy', $bakim) }}" 
+                                                      class="d-inline"
+                                                      onsubmit="return confirm('Bu servis kaydını silmek istediğinizden emin misiniz?')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" 
+                                                            class="btn btn-sm btn-outline-danger" 
+                                                            title="Sil">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <p class="mb-1"><strong>Müşteri:</strong> {{ $bakim->musteri_adi }}</p>
+                                                    <p class="mb-1"><strong>Telefon:</strong> {{ $bakim->telefon_numarasi }}</p>
+                                                    <p class="mb-1"><strong>Şase:</strong> {{ $bakim->sase }}</p>
+                                                </div>
+                                                <div class="col-6">
+                                                    <p class="mb-1"><strong>Bakım Durumu:</strong>
+                                                        @if($bakim->bakim_durumu == 'Devam Ediyor')
+                                                            <span class="badge badge-devam">Devam Ediyor</span>
+                                                        @else
+                                                            <span class="badge badge-tamamlandi">Tamamlandı</span>
+                                                        @endif
+                                                    </p>
+                                                    <p class="mb-1"><strong>Ödeme:</strong>
+                                                        @if($bakim->bakim_durumu == 'Devam Ediyor')
+                                                            <span class="badge bg-warning">Bakım Devam Ediyor</span>
+                                                        @elseif($bakim->odeme_durumu == 0)
+                                                            <span class="badge badge-odeme-bekliyor">Ödeme Bekliyor</span>
+                                                        @else
+                                                            <span class="badge badge-odeme-alindi">Ödeme Alındı</span>
+                                                        @endif
+                                                    </p>
+                                                    <p class="mb-1"><strong>Tarih:</strong> {{ $bakim->bakim_tarihi->format('d.m.Y') }}</p>
+                                                </div>
+                                            </div>
+                                            <div class="row mt-2">
+                                                <div class="col-12">
+                                                    <p class="mb-1"><strong>Toplam Ücret:</strong> 
+                                                        <span class="text-success fw-bold">{{ number_format(($bakim->ucret ?? 0) + ($bakim->iscilik_ucreti ?? 0), 2) }} ₺</span>
+                                                    </p>
+                                                    @if($bakim->iscilik_ucreti > 0)
+                                                        <small class="text-muted">
+                                                            Parça: {{ number_format($bakim->ucret ?? 0, 2) }} ₺ | 
+                                                            İşçilik: {{ number_format($bakim->iscilik_ucreti ?? 0, 2) }} ₺
+                                                        </small>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                            @if($bakim->tamamlayanPersonel)
+                                                <div class="row mt-2">
+                                                    <div class="col-12">
+                                                        <p class="mb-1"><strong>Tamamlayan:</strong> {{ $bakim->tamamlayanPersonel->name }}</p>
+                                                    </div>
+                                                </div>
+                                            @endif
+                                            @if($bakim->tamamlanma_notu)
+                                                <div class="row mt-2">
+                                                    <div class="col-12">
+                                                        <p class="mb-1"><strong>Not:</strong> {{ $bakim->tamamlanma_notu }}</p>
+                                                    </div>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @empty
+                                    <div class="text-center py-4">
+                                        <div class="text-muted">
+                                            <i class="fas fa-cogs fa-3x mb-3"></i>
+                                            <p>Henüz servis kaydı bulunmuyor.</p>
+                                            <a href="{{ route('bakim.create') }}" class="btn btn-primary">
+                                                <i class="fas fa-plus me-2"></i>
+                                                İlk Servis Kaydını Oluştur
+                                            </a>
+                                        </div>
+                                    </div>
+                                @endforelse
+                            </div>
+
                             <!-- Pagination -->
                             @if($bakimlar->hasPages())
                                 <div class="pagination-container">
@@ -439,9 +379,9 @@
                 </div>
             </div>
         </div>
-    </div>
+@endsection
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+@section('additional-scripts')
     <script>
         // Initialize tooltips
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
@@ -495,5 +435,4 @@
             }
         });
     </script>
-</body>
-</html>
+@endsection
