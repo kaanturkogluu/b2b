@@ -69,14 +69,21 @@ class StaffController extends Controller
         return view('staff.profile', compact('user', 'performance'));
     }
     
-    public function tasks()
+    public function tasks(Request $request)
     {
         $user = Auth::user();
         
         // Personelin tüm görevleri - son eklenenler ilk görünsün
-        $tasks = Bakim::where('personel_id', $user->id)
-                     ->orderBy('created_at', 'desc')
-                     ->paginate(10);
+        $query = Bakim::where('personel_id', $user->id);
+        
+        // Arama filtresi - Sadece plaka ile arama
+        if ($request->filled('search')) {
+            $search = $request->search;
+            // Plaka araması - boşlukları kaldırarak esnek arama
+            $query->whereRaw('LOWER(REPLACE(plaka, " ", "")) LIKE ?', ['%' . strtolower(str_replace(' ', '', $search)) . '%']);
+        }
+        
+        $tasks = $query->orderBy('created_at', 'desc')->paginate(10);
         
         return view('staff.tasks', compact('user', 'tasks'));
     }

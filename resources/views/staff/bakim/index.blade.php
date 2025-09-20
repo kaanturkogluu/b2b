@@ -83,7 +83,7 @@
                                                     <input type="text" 
                                                            name="search" 
                                                            class="form-control" 
-                                                           placeholder="Plaka, müşteri, telefon, şase..." 
+                                                           placeholder="Plaka ara..." 
                                                            value="{{ request('search') }}">
                                                 </div>
                                                 
@@ -432,14 +432,9 @@
 
 @section('additional-scripts')
     <script>
-        // Auto-submit form on select change
+        // Initialize any additional features if needed
         document.addEventListener('DOMContentLoaded', function() {
-            const selects = document.querySelectorAll('select[name="bakim_durumu"], select[name="odeme_durumu"], select[name="sort_by"]');
-            selects.forEach(select => {
-                select.addEventListener('change', function() {
-                    this.form.submit();
-                });
-            });
+            // Add any initialization code here if needed
         });
     </script>
 @endsection

@@ -31,15 +31,11 @@ class BakimController extends Controller
             'degisecekParcalar:id,bakim_id,parca_adi,adet,birim_fiyat'
         ]);
             
-            // Arama filtresi - Full-text search için optimize edildi
+            // Arama filtresi - Sadece plaka ile arama
             if ($request->filled('search')) {
                 $search = $request->search;
-                $query->where(function($q) use ($search) {
-                    $q->where('plaka', 'like', "{$search}%") // Prefix search daha hızlı
-                      ->orWhere('musteri_adi', 'like', "%{$search}%")
-                      ->orWhere('telefon_numarasi', 'like', "{$search}%")
-                      ->orWhere('sase', 'like', "{$search}%");
-                });
+                // Plaka araması - boşlukları kaldırarak esnek arama
+                $query->whereRaw('LOWER(REPLACE(plaka, " ", "")) LIKE ?', ['%' . strtolower(str_replace(' ', '', $search)) . '%']);
             }
             
             // Filtreler - Index kullanımı için optimize edildi
@@ -112,15 +108,11 @@ class BakimController extends Controller
         ]);
         // Personeller artık tüm bakımları görebilir - filtreleme kaldırıldı
             
-            // Arama filtresi - Full-text search için optimize edildi
+            // Arama filtresi - Sadece plaka ile arama
             if ($request->filled('search')) {
                 $search = $request->search;
-                $query->where(function($q) use ($search) {
-                    $q->where('plaka', 'like', "{$search}%") // Prefix search daha hızlı
-                      ->orWhere('musteri_adi', 'like', "%{$search}%")
-                      ->orWhere('telefon_numarasi', 'like', "{$search}%")
-                      ->orWhere('sase', 'like', "{$search}%");
-                });
+                // Plaka araması - boşlukları kaldırarak esnek arama
+                $query->whereRaw('LOWER(REPLACE(plaka, " ", "")) LIKE ?', ['%' . strtolower(str_replace(' ', '', $search)) . '%']);
             }
             
             // Filtreler - Index kullanımı için optimize edildi
@@ -502,12 +494,8 @@ class BakimController extends Controller
         // Apply same filters as index method
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('plaka', 'like', "%{$search}%")
-                  ->orWhere('musteri_adi', 'like', "%{$search}%")
-                  ->orWhere('telefon_numarasi', 'like', "%{$search}%")
-                  ->orWhere('sase', 'like', "%{$search}%");
-            });
+            // Plaka araması - boşlukları kaldırarak esnek arama
+            $query->whereRaw('LOWER(REPLACE(plaka, " ", "")) LIKE ?', ['%' . strtolower(str_replace(' ', '', $search)) . '%']);
         }
         
         if ($request->filled('bakim_durumu')) {

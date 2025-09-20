@@ -38,7 +38,7 @@
                                                     <input type="text" 
                                                            name="search" 
                                                            class="form-control" 
-                                                           placeholder="Plaka, müşteri, telefon, şase..." 
+                                                           placeholder="Plaka ara..." 
                                                            value="{{ request('search') }}">
                                                 </div>
                                                 
@@ -398,15 +398,8 @@
             window.open('{{ route("bakim.export.excel") }}?' + params.toString(), '_blank');
         }
         
-        // Auto-submit form on select change
+        // Initialize tooltips and other features
         document.addEventListener('DOMContentLoaded', function() {
-            const selects = document.querySelectorAll('select[name="bakim_durumu"], select[name="odeme_durumu"], select[name="sort_by"]');
-            selects.forEach(select => {
-                select.addEventListener('change', function() {
-                    this.form.submit();
-                });
-            });
-            
             // Lazy loading for images
             const images = document.querySelectorAll('img[data-src]');
             const imageObserver = new IntersectionObserver((entries, observer) => {
@@ -421,18 +414,6 @@
             });
             
             images.forEach(img => imageObserver.observe(img));
-            
-            // Debounced search
-            let searchTimeout;
-            const searchInput = document.querySelector('input[name="search"]');
-            if (searchInput) {
-                searchInput.addEventListener('input', function() {
-                    clearTimeout(searchTimeout);
-                    searchTimeout = setTimeout(() => {
-                        this.form.submit();
-                    }, 500);
-                });
-            }
         });
     </script>
 @endsection

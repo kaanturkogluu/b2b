@@ -17,10 +17,11 @@
             color: white;
             position: fixed;
             top: 0;
-            left: -250px;
-            width: 250px;
-            z-index: 1000;
+            left: -280px;
+            width: 280px;
+            z-index: 1050;
             transition: left 0.3s ease;
+            overflow-y: auto;
         }
         .sidebar.show {
             left: 0;
@@ -29,8 +30,9 @@
             color: rgba(255, 255, 255, 0.8);
             padding: 12px 20px;
             border-radius: 8px;
-            margin: 5px 0;
+            margin: 5px 15px;
             transition: all 0.3s ease;
+            white-space: nowrap;
         }
         .sidebar .nav-link:hover {
             background-color: rgba(255, 255, 255, 0.1);
@@ -44,16 +46,71 @@
             padding: 1rem;
             margin-left: 0;
             transition: margin-left 0.3s ease;
+            width: 100%;
+        }
+        .mobile-header {
+            background: white;
+            padding: 1rem;
+            border-bottom: 1px solid #e9ecef;
+            margin-bottom: 1rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .mobile-header .btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1040;
+            display: none;
+        }
+        .overlay.show {
+            display: block;
         }
         @media (min-width: 768px) {
             .sidebar {
                 position: relative;
                 left: 0;
                 width: auto;
+                min-height: 100vh;
+                z-index: auto;
             }
             .main-content {
                 margin-left: 0;
                 padding: 2rem;
+            }
+            .mobile-header {
+                display: none;
+            }
+            .overlay {
+                display: none !important;
+            }
+        }
+        @media (max-width: 767px) {
+            .sidebar {
+                width: 280px;
+            }
+            .main-content {
+                padding: 0.5rem;
+            }
+            .card {
+                margin-bottom: 1rem;
+            }
+            .table-responsive {
+                font-size: 0.875rem;
+            }
+            .btn-group .btn {
+                padding: 0.25rem 0.5rem;
+                font-size: 0.75rem;
             }
         }
         .card {
@@ -224,11 +281,11 @@
 </head>
 <body class="@yield('body-class', '')">
     <!-- Mobile Header -->
-    <div class="mobile-header">
-        <button class="mobile-menu-btn" onclick="toggleSidebar()">
+    <div class="mobile-header d-md-none">
+        <button class="btn btn-outline-light mobile-menu-btn" onclick="toggleSidebar()">
             <i class="fas fa-bars"></i>
         </button>
-        <h4 class="mb-0">MotoJet Servis</h4>
+        <h5 class="mb-0 text-dark">@yield('page-title', 'MotoJet Servis')</h5>
         <div class="d-flex align-items-center">
             <span class="badge @yield('user-badge-class', 'bg-primary') me-2">@yield('user-role', 'Kullanıcı')</span>
             <form method="POST" action="{{ route('logout') }}" class="d-inline">
@@ -243,26 +300,29 @@
     <!-- Sidebar Overlay -->
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
-    <!-- Sidebar -->
-    <div class="sidebar" id="sidebar">
-        <div class="p-3">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h4 class="mb-0">
-                    <i class="fas fa-motorcycle me-2"></i>
-                    MotoJet Servis
-                </h4>
-                <button class="btn btn-sm btn-outline-light d-md-none" onclick="toggleSidebar()">
-                    <i class="fas fa-times"></i>
-                </button>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 sidebar" id="sidebar">
+                <div class="p-3">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="mb-0">
+                            <i class="fas fa-motorcycle me-2"></i>
+                            MotoJet Servis
+                        </h4>
+                        <button class="btn btn-sm btn-outline-light d-md-none" onclick="toggleSidebar()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <nav class="nav flex-column">
+                        @yield('sidebar-nav')
+                    </nav>
+                </div>
             </div>
-            <nav class="nav flex-column">
-                @yield('sidebar-nav')
-            </nav>
-        </div>
-    </div>
 
-    <!-- Main Content -->
-    <div class="main-content">
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10">
+                <div class="main-content">
         <!-- Desktop Header -->
         <div class="header d-none d-md-flex justify-content-between align-items-center">
             <div>
@@ -300,6 +360,9 @@
 
         <!-- Page Content -->
         @yield('content')
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -310,6 +373,13 @@
             
             sidebar.classList.toggle('show');
             overlay.classList.toggle('show');
+            
+            // Prevent body scroll when sidebar is open on mobile
+            if (sidebar.classList.contains('show')) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = '';
+            }
         }
 
         // Close sidebar when clicking on nav links on mobile
@@ -323,6 +393,7 @@
                     if (window.innerWidth < 768) {
                         sidebar.classList.remove('show');
                         overlay.classList.remove('show');
+                        document.body.style.overflow = '';
                     }
                 });
             });
@@ -331,6 +402,7 @@
             overlay.addEventListener('click', function() {
                 sidebar.classList.remove('show');
                 overlay.classList.remove('show');
+                document.body.style.overflow = '';
             });
 
             // Handle window resize
@@ -338,7 +410,37 @@
                 if (window.innerWidth >= 768) {
                     sidebar.classList.remove('show');
                     overlay.classList.remove('show');
+                    document.body.style.overflow = '';
                 }
+            });
+
+            // Touch gestures for mobile
+            let startX = 0;
+            let startY = 0;
+            
+            document.addEventListener('touchstart', function(e) {
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+            });
+            
+            document.addEventListener('touchend', function(e) {
+                if (!startX || !startY) return;
+                
+                const endX = e.changedTouches[0].clientX;
+                const endY = e.changedTouches[0].clientY;
+                
+                const diffX = startX - endX;
+                const diffY = startY - endY;
+                
+                // Swipe left to close sidebar
+                if (Math.abs(diffX) > Math.abs(diffY) && diffX > 50 && sidebar.classList.contains('show')) {
+                    sidebar.classList.remove('show');
+                    overlay.classList.remove('show');
+                    document.body.style.overflow = '';
+                }
+                
+                startX = 0;
+                startY = 0;
             });
         });
     </script>
