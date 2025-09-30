@@ -119,7 +119,7 @@ class StaffController extends Controller
             'bakim_durumu' => 'Tamamlandı',
             'tamamlayan_personel_id' => Auth::id(),
             'tamamlanma_tarihi' => now(),
-            'tamamlanma_notu' => $request->tamamlanma_notu
+            'tamamlanma_notu' => !empty($request->tamamlanma_notu) ? $request->tamamlanma_notu : 'Açıklama yok'
         ]);
 
         // Activity log

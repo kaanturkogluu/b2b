@@ -204,7 +204,7 @@ class BakimController extends Controller
                 'bakim_durumu' => 'Devam Ediyor',
                 'ucret' => $request->ucret,
                 'iscilik_ucreti' => $request->iscilik_ucreti ?? 0,
-                'genel_aciklama' => $request->genel_aciklama ?? 'Beklemede',
+                'genel_aciklama' => !empty($request->genel_aciklama) ? $request->genel_aciklama : 'Açıklama yok',
                 'admin_id' => Auth::id(),
                 'bakim_tarihi' => $request->bakim_tarihi,
                 'personel_id' => null // Servis oluşturulurken personel atanmaz
@@ -314,7 +314,7 @@ class BakimController extends Controller
                 'bakim_durumu' => $request->bakim_durumu,
                 'ucret' => $request->ucret,
                 'iscilik_ucreti' => $request->iscilik_ucreti ?? 0,
-                'genel_aciklama' => $request->genel_aciklama,
+                'genel_aciklama' => !empty($request->genel_aciklama) ? $request->genel_aciklama : 'Açıklama yok',
                 'bakim_tarihi' => $request->bakim_tarihi,
                 // personel_id kaldırıldı
             ];
