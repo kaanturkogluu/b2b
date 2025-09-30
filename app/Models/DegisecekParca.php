@@ -29,6 +29,6 @@ class DegisecekParca extends Model
 
     public function getToplamFiyatAttribute()
     {
-        return round($this->adet * $this->birim_fiyat, 2);
+        return $this->adet * $this->birim_fiyat;
     }
 }

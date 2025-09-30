@@ -308,7 +308,7 @@
             calculateTotal();
         }
 
-        // Fiyat hesaplama (parça + işçilik)
+        // Fiyat hesaplama (parça + işçilik) - Floating point precision sorunları düzeltildi
         function calculateTotal() {
             let parcaTotal = 0;
             const parcaRows = document.querySelectorAll('.parca-row');
@@ -326,10 +326,10 @@
                     const birimFiyat = parseFloat(birimFiyatInput.value) || 0;
                     
                     // Boş alanları atla
-                    if (parcaAdi && adet > 0 && birimFiyat >= 0) {
-                        // Hassasiyet sorunlarını önlemek için Math.round kullan
+                    if (parcaAdi && adet > 0) {
+                        // Floating point precision sorununu önlemek için Math.round kullan
                         const parcaToplam = Math.round((adet * birimFiyat) * 100) / 100;
-                        parcaTotal += parcaToplam;
+                        parcaTotal = Math.round((parcaTotal + parcaToplam) * 100) / 100;
                     }
                 }
             });
@@ -337,7 +337,7 @@
             // İşçilik ücretini al
             const iscilikUcreti = parseFloat(document.getElementById('iscilik_ucreti').value) || 0;
             
-            // Toplam hesapla - hassasiyet sorunlarını önlemek için Math.round kullan
+            // Toplam hesapla - Floating point precision sorununu önlemek için Math.round kullan
             const toplamUcret = Math.round((parcaTotal + iscilikUcreti) * 100) / 100;
             
             // Değerleri güncelle
