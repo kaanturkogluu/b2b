@@ -292,7 +292,8 @@
                                                                        name="parcalar[{{ $index }}][parca_adi]" 
                                                                        value="{{ $parca->parca_adi }}"
                                                                        {{ $bakim->bakim_durumu == 'Tamamlandı' ? 'readonly' : '' }}
-                                                                       placeholder="Parça adını girin">
+                                                                       placeholder="Parça adını girin"
+                                                                       onchange="calculateTotal()">
                                                             </div>
                                                             <div class="col-md-2">
                                                                 <label class="form-label">Adet</label>
@@ -461,8 +462,10 @@
                     const birimFiyat = parseFloat(birimFiyatInput.value) || 0;
                     
                     // Boş alanları atla
-                    if (parcaAdi && adet > 0) {
-                        parcaTotal += adet * birimFiyat;
+                    if (parcaAdi && adet > 0 && birimFiyat >= 0) {
+                        // Hassasiyet sorunlarını önlemek için Math.round kullan
+                        const parcaToplam = Math.round((adet * birimFiyat) * 100) / 100;
+                        parcaTotal += parcaToplam;
                     }
                 }
             });
@@ -470,8 +473,8 @@
             // İşçilik ücretini al
             const iscilikUcreti = parseFloat(document.getElementById('iscilik_ucreti').value) || 0;
             
-            // Toplam hesapla
-            const toplamUcret = parcaTotal + iscilikUcreti;
+            // Toplam hesapla - hassasiyet sorunlarını önlemek için Math.round kullan
+            const toplamUcret = Math.round((parcaTotal + iscilikUcreti) * 100) / 100;
             
             // Değerleri güncelle
             const formattedParcaTotal = parcaTotal.toFixed(2);

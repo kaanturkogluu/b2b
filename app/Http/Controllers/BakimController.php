@@ -220,7 +220,7 @@ class BakimController extends Controller
                             'bakim_id' => $bakim->id,
                             'parca_adi' => trim($parca['parca_adi']),
                             'adet' => (int)$parca['adet'],
-                            'birim_fiyat' => (float)($parca['birim_fiyat'] ?? 0),
+                            'birim_fiyat' => round((float)($parca['birim_fiyat'] ?? 0), 2),
                             'aciklama' => !empty($parca['aciklama']) ? trim($parca['aciklama']) : null
                         ]);
                     }
@@ -359,7 +359,7 @@ class BakimController extends Controller
                         $parcaData = [
                             'parca_adi' => trim($parca['parca_adi']),
                             'adet' => (int)$parca['adet'],
-                            'birim_fiyat' => (float)($parca['birim_fiyat'] ?? 0),
+                            'birim_fiyat' => round((float)($parca['birim_fiyat'] ?? 0), 2),
                             'aciklama' => !empty($parca['aciklama']) ? trim($parca['aciklama']) : null
                         ];
                         
