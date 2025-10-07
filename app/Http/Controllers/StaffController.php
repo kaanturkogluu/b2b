@@ -15,9 +15,20 @@ class StaffController extends Controller
     {
         $user = Auth::user();
         
+        // Log: Personel dashboard erişimi
+        ActivityLog::log(
+            'staff_dashboard_view',
+            "Personel dashboard'a erişti: {$user->name}",
+            Auth::id(),
+            null,
+            'App\Models\User',
+            ['role' => 'staff']
+        );
+        
         // Optimize edilmiş sorgular - tek sorguda tüm veriler
         $stats = DB::table('bakim')
             ->where('tamamlayan_personel_id', $user->id)
+            ->where('is_deleted', false)
             ->selectRaw('
                 COUNT(*) as total_services,
                 SUM(CASE WHEN bakim_durumu = "Devam Ediyor" THEN 1 ELSE 0 END) as active_tasks,
@@ -29,6 +40,7 @@ class StaffController extends Controller
         // Bugünkü görevler - optimize edilmiş sorgu, son eklenenler ilk görünsün
         $todayTasks = Bakim::select('id', 'plaka', 'musteri_adi', 'bakim_tarihi', 'bakim_durumu')
             ->where('tamamlayan_personel_id', $user->id)
+            ->where('is_deleted', false)
             ->whereDate('bakim_tarihi', now()->toDateString())
             ->orderBy('created_at', 'desc')
             ->get();
@@ -36,6 +48,7 @@ class StaffController extends Controller
         // Yaklaşan görevler - optimize edilmiş sorgu, son eklenenler ilk görünsün
         $upcomingTasks = Bakim::select('id', 'plaka', 'musteri_adi', 'bakim_tarihi', 'bakim_durumu')
             ->where('tamamlayan_personel_id', $user->id)
+            ->where('is_deleted', false)
             ->where('bakim_tarihi', '>', now()->endOfDay())
             ->where('bakim_tarihi', '<=', now()->addDays(7))
             ->orderBy('created_at', 'desc')
@@ -55,7 +68,9 @@ class StaffController extends Controller
         $user = Auth::user();
         
         // Personelin performans istatistikleri
-        $myServices = Bakim::where('personel_id', $user->id)->get();
+        $myServices = Bakim::where('personel_id', $user->id)
+                           ->where('is_deleted', false)
+                           ->get();
         
         $performance = [
             'total_services' => $myServices->count(),
@@ -74,7 +89,8 @@ class StaffController extends Controller
         $user = Auth::user();
         
         // Personelin tüm görevleri - son eklenenler ilk görünsün
-        $query = Bakim::where('personel_id', $user->id);
+        $query = Bakim::where('personel_id', $user->id)
+                      ->where('is_deleted', false);
         
         // Arama filtresi - Sadece plaka ile arama
         if ($request->filled('search')) {
@@ -83,7 +99,7 @@ class StaffController extends Controller
             $query->whereRaw('LOWER(REPLACE(plaka, " ", "")) LIKE ?', ['%' . strtolower(str_replace(' ', '', $search)) . '%']);
         }
         
-        $tasks = $query->orderBy('created_at', 'desc')->paginate(10);
+        $tasks = $query->orderBy('created_at', 'desc')->paginate(20);
         
         return view('staff.tasks', compact('user', 'tasks'));
     }
@@ -94,6 +110,7 @@ class StaffController extends Controller
         
         // Personelin zaman çizelgesi - son eklenenler ilk görünsün
         $timeline = Bakim::where('personel_id', $user->id)
+                        ->where('is_deleted', false)
                         ->orderBy('created_at', 'desc')
                         ->get()
                         ->groupBy(function($item) {
@@ -105,6 +122,15 @@ class StaffController extends Controller
     
     public function completeMaintenance(Request $request, Bakim $bakim)
     {
+        // NOT: Personeller ekip çalışması için birbirlerinin bakımlarını tamamlayabilir
+        // Eğer sadece kendi bakımlarını tamamlamasını isterseniz, aşağıdaki kontrolü aktif edin:
+        /*
+        if ($bakim->personel_id != Auth::id()) {
+            return redirect()->route('staff.bakim.index')
+                            ->with('error', 'Bu bakım size atanmamış!');
+        }
+        */
+        
         // Servis zaten onaylanmış mı kontrol et
         if ($bakim->bakim_durumu == 'Tamamlandı') {
             return redirect()->route('staff.bakim.index')
@@ -115,30 +141,45 @@ class StaffController extends Controller
             'tamamlanma_notu' => 'nullable|string|max:1000'
         ]);
 
-        $bakim->update([
-            'bakim_durumu' => 'Tamamlandı',
-            'tamamlayan_personel_id' => Auth::id(),
-            'tamamlanma_tarihi' => now(),
-            'tamamlanma_notu' => !empty($request->tamamlanma_notu) ? $request->tamamlanma_notu : 'Açıklama yok'
-        ]);
+        DB::beginTransaction();
+        try {
+            $bakim->update([
+                'bakim_durumu' => 'Tamamlandı',
+                'tamamlayan_personel_id' => Auth::id(),
+                'tamamlanma_tarihi' => now(),
+                'tamamlanma_notu' => !empty($request->tamamlanma_notu) ? $request->tamamlanma_notu : 'Açıklama yok'
+            ]);
 
-        // Activity log
-        ActivityLog::log(
-            'bakim_completed',
-            "Bakım onaylandı: {$bakim->plaka} - {$bakim->musteri_adi}",
-            Auth::id(),
-            $bakim->id,
-            'App\Models\Bakim',
-            [
-                'plaka' => $bakim->plaka,
-                'musteri_adi' => $bakim->musteri_adi,
-                'tamamlanma_notu' => $request->tamamlanma_notu
-            ]
-        );
+            // Activity log - Detaylı personel işlemi
+            $user = Auth::user();
+            ActivityLog::log(
+                'staff_bakim_completed',
+                "PERSONEL: {$user->name} bakım tamamladı - Plaka: {$bakim->plaka}, Müşteri: {$bakim->musteri_adi}",
+                Auth::id(),
+                $bakim->id,
+                'App\Models\Bakim',
+                [
+                    'action' => 'completed',
+                    'role' => 'staff',
+                    'staff_name' => $user->name,
+                    'staff_username' => $user->username,
+                    'plaka' => $bakim->plaka,
+                    'musteri_adi' => $bakim->musteri_adi,
+                    'tamamlanma_notu' => $request->tamamlanma_notu,
+                    'tamamlanma_tarihi' => now()->format('Y-m-d H:i:s'),
+                    'was_assigned_to' => $bakim->personel_id,
+                    'completed_by' => Auth::id()
+                ]
+            );
 
-
-        return redirect()->route('staff.bakim.index')
-                        ->with('success', 'Bakım başarıyla onaylandı!');
+            DB::commit();
+            return redirect()->route('staff.bakim.index')
+                            ->with('success', 'Bakım başarıyla onaylandı!');
+        } catch (\Exception $e) {
+            DB::rollback();
+            return redirect()->route('staff.bakim.index')
+                            ->with('error', 'Bakım tamamlanırken bir hata oluştu: ' . $e->getMessage());
+        }
     }
 
     private function calculateAverageServiceTime($services)

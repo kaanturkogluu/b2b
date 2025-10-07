@@ -28,8 +28,12 @@ class BakimController extends Controller
             'admin:id,name,username',
             'personel:id,name,username',
             'tamamlayanPersonel:id,name,username',
-            'degisecekParcalar:id,bakim_id,parca_adi,adet,birim_fiyat'
-        ]);
+            'degisecekParcalar' => function($query) {
+                $query->select('id', 'bakim_id', 'parca_adi', 'adet', 'birim_fiyat')
+                      ->where('is_deleted', false); // Silinmemiş parçaları getir
+            }
+        ])
+        ->where('is_deleted', false); // Silinmemiş bakımları getir
             
             // Arama filtresi - Sadece plaka ile arama
             if ($request->filled('search')) {
@@ -78,7 +82,7 @@ class BakimController extends Controller
                 $query->orderBy('created_at', 'desc');
             }
             
-        $bakimlar = $query->paginate(10)->appends($request->query());
+        $bakimlar = $query->paginate(20)->appends($request->query());
         
         // Personel listesi kaldırıldı - sadece tamamlayan personel gösterilir
         
@@ -104,9 +108,16 @@ class BakimController extends Controller
             'admin:id,name,username',
             'personel:id,name,username',
             'tamamlayanPersonel:id,name,username',
-            'degisecekParcalar:id,bakim_id,parca_adi,adet,birim_fiyat'
-        ]);
-        // Personeller artık tüm bakımları görebilir - filtreleme kaldırıldı
+            'degisecekParcalar' => function($query) {
+                $query->select('id', 'bakim_id', 'parca_adi', 'adet', 'birim_fiyat')
+                      ->where('is_deleted', false); // Silinmemiş parçaları getir
+            }
+        ])
+        ->where('is_deleted', false); // Silinmemiş bakımları getir
+        
+        // EKIP ÇALIŞMASI: Personeller tüm bakımları görebilir ve birbirlerinin bakımlarını tamamlayabilir
+        // NOT: Sadece kendi bakımlarını göstermek isterseniz şu satırı ekleyin:
+        // $query->where('personel_id', $user->id);
             
             // Arama filtresi - Sadece plaka ile arama
             if ($request->filled('search')) {
@@ -144,7 +155,7 @@ class BakimController extends Controller
                 $query->orderBy('created_at', 'desc');
             }
             
-        $bakimlar = $query->paginate(10)->appends($request->query());
+        $bakimlar = $query->paginate(20)->appends($request->query());
         
         $filterOptions = $this->getFilterOptions();
             
@@ -157,6 +168,20 @@ class BakimController extends Controller
     public function staffShow(Bakim $bakim)
     {
         $bakim->load(['admin', 'personel', 'tamamlayanPersonel', 'degisecekParcalar']);
+        
+        // Log: Personel bakım detayı görüntüledi
+        ActivityLog::log(
+            'staff_bakim_view',
+            "Personel bakım detayını görüntüledi: {$bakim->plaka} - {$bakim->musteri_adi}",
+            Auth::id(),
+            $bakim->id,
+            'App\Models\Bakim',
+            [
+                'plaka' => $bakim->plaka,
+                'musteri_adi' => $bakim->musteri_adi,
+                'bakim_durumu' => $bakim->bakim_durumu
+            ]
+        );
         
         return view('staff.bakim.show', compact('bakim'));
     }
@@ -363,10 +388,25 @@ class BakimController extends Controller
                             'aciklama' => !empty($parca['aciklama']) ? trim($parca['aciklama']) : null
                         ];
                         
-                        // Eğer parça ID'si varsa güncelle, yoksa yeni oluştur
+                        // Eğer parça ID'si varsa, BU BAKIM KAYDINA AİT OLUP OLMADIĞINI KONTROL ET
                         if (isset($parca['id']) && $existingParcalar->has($parca['id'])) {
-                            $existingParcalar[$parca['id']]->update($parcaData);
-                            $submittedParcaIds[] = $parca['id'];
+                            // GÜVENLİK: Parçanın gerçekten bu bakım kaydına ait olduğunu doğrula
+                            $parcaToUpdate = $existingParcalar[$parca['id']];
+                            if ($parcaToUpdate->bakim_id == $bakim->id) {
+                                $parcaToUpdate->update($parcaData);
+                                $submittedParcaIds[] = $parca['id'];
+                            } else {
+                                // GÜVENLİK: Yanlış bakım kaydının parçası - güvenlik ihlali
+                                \Log::warning('Parça ID güvenlik ihlali tespit edildi', [
+                                    'user_id' => Auth::id(),
+                                    'bakim_id' => $bakim->id,
+                                    'parca_id' => $parca['id'],
+                                    'actual_bakim_id' => $parcaToUpdate->bakim_id
+                                ]);
+                                // Bu parçayı işleme, yeni parça olarak oluştur
+                                $newParca = DegisecekParca::create(array_merge($parcaData, ['bakim_id' => $bakim->id]));
+                                $submittedParcaIds[] = $newParca->id;
+                            }
                         } else {
                             $newParca = DegisecekParca::create(array_merge($parcaData, ['bakim_id' => $bakim->id]));
                             $submittedParcaIds[] = $newParca->id;
@@ -374,10 +414,13 @@ class BakimController extends Controller
                     }
                 }
                 
-                // Form'da gönderilmeyen parçaları sil
+                // Form'da gönderilmeyen parçaları sil (sadece bu bakım kaydına ait olanları)
                 $parcalarToDelete = $existingParcalar->keys()->diff($submittedParcaIds);
                 foreach ($parcalarToDelete as $parcaId) {
-                    $existingParcalar[$parcaId]->delete();
+                    // GÜVENLİK: Sadece bu bakım kaydına ait parçaları sil
+                    if ($existingParcalar[$parcaId]->bakim_id == $bakim->id) {
+                        $existingParcalar[$parcaId]->delete();
+                    }
                 }
             } else {
                 // Eğer hiç parça gönderilmemişse tüm parçaları sil
@@ -416,38 +459,32 @@ class BakimController extends Controller
             return back()->with('error', 'Bu bakım için ödeme zaten onaylanmış!');
         }
 
-        $bakim->update([
-            'odeme_durumu' => 1
-        ]);
+        DB::beginTransaction();
+        try {
+            $bakim->update([
+                'odeme_durumu' => 1
+            ]);
 
-        // Activity log
-        ActivityLog::log(
-            'payment_approved',
-            "Ödeme onaylandı: {$bakim->plaka} - {$bakim->musteri_adi}",
-            Auth::id(),
-            $bakim->id,
-            'App\Models\Bakim',
-            [
-                'plaka' => $bakim->plaka,
-                'musteri_adi' => $bakim->musteri_adi,
-                'ucret' => $bakim->ucret
-            ]
-        );
+            // Activity log
+            ActivityLog::log(
+                'payment_approved',
+                "Ödeme onaylandı: {$bakim->plaka} - {$bakim->musteri_adi}",
+                Auth::id(),
+                $bakim->id,
+                'App\Models\Bakim',
+                [
+                    'plaka' => $bakim->plaka,
+                    'musteri_adi' => $bakim->musteri_adi,
+                    'ucret' => $bakim->ucret
+                ]
+            );
 
-        // Cache'i temizle
-        $this->clearBakimCache();
-
-        return back()->with('success', 'Ödeme başarıyla onaylandı!');
-    }
-
-    /**
-     * Clear bakım related cache
-     */
-    private function clearBakimCache()
-    {
-        // Clear any bakım related cache if needed
-        // For now, we'll just clear the general cache
-        \Cache::flush();
+            DB::commit();
+            return back()->with('success', 'Ödeme başarıyla onaylandı!');
+        } catch (\Exception $e) {
+            DB::rollback();
+            return back()->with('error', 'Ödeme onaylanırken bir hata oluştu: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -455,8 +492,9 @@ class BakimController extends Controller
      */
     public function destroy(Bakim $bakim)
     {
+        DB::beginTransaction();
         try {
-            // Store bakım data before deletion for activity log
+            // SOFT DELETE: Kayıt veritabanından silinmez, sadece işaretlenir
             $bakimData = [
                 'plaka' => $bakim->plaka,
                 'musteri_adi' => $bakim->musteri_adi,
@@ -466,20 +504,33 @@ class BakimController extends Controller
                 'bakim_tarihi' => $bakim->bakim_tarihi?->format('Y-m-d H:i:s')
             ];
 
-            $bakim->delete();
+            // Parçaları da soft delete yap
+            $bakim->degisecekParcalar()->update([
+                'is_deleted' => true,
+                'deleted_at' => now()
+            ]);
+
+            // Bakım kaydını soft delete yap
+            $bakim->update([
+                'is_deleted' => true,
+                'deleted_at' => now(),
+                'deleted_by' => Auth::id()
+            ]);
 
             // Activity log
             ActivityLog::log(
-                'bakim_deleted',
-                "Bakım kaydı silindi: {$bakimData['plaka']} - {$bakimData['musteri_adi']}",
+                'bakim_soft_deleted',
+                "Bakım kaydı silindi (soft delete): {$bakimData['plaka']} - {$bakimData['musteri_adi']}",
                 Auth::id(),
-                null, // related_id is null since record is deleted
+                $bakim->id, // related_id hala mevcut (soft delete)
                 'App\Models\Bakim',
                 $bakimData
             );
 
+            DB::commit();
             return redirect()->route('bakim.index')->with('success', 'Bakım kaydı başarıyla silindi.');
         } catch (\Exception $e) {
+            DB::rollback();
             return back()->with('error', 'Bakım kaydı silinirken bir hata oluştu: ' . $e->getMessage());
         }
     }

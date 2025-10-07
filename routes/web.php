@@ -44,6 +44,12 @@ Route::middleware(['web', 'auth'])->group(function () {
         Route::get('/api-import/fetch', [\App\Http\Controllers\ApiImportController::class, 'fetchData'])->name('api-import.fetch');
         Route::post('/api-import/import', [\App\Http\Controllers\ApiImportController::class, 'importData'])->name('api-import.import');
         
+        // Log Management Routes
+        Route::get('/logs/activity', [\App\Http\Controllers\LogController::class, 'activityLogs'])->name('logs.activity');
+        Route::get('/logs/login', [\App\Http\Controllers\LogController::class, 'loginLogs'])->name('logs.login');
+        Route::get('/logs/statistics', [\App\Http\Controllers\LogController::class, 'statistics'])->name('logs.statistics');
+        Route::get('/logs/{id}', [\App\Http\Controllers\LogController::class, 'show'])->name('logs.show');
+        Route::get('/logs/login/{id}', [\App\Http\Controllers\LogController::class, 'showLoginLog'])->name('logs.show-login');
     });
     
     // Staff Routes

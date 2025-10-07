@@ -11,6 +11,11 @@ class ActivityLog extends Model
         'type',
         'description',
         'user_id',
+        'ip_address',
+        'user_agent',
+        'request_method',
+        'request_url',
+        'session_id',
         'related_id',
         'related_type',
         'metadata'
@@ -34,10 +39,17 @@ class ActivityLog extends Model
 
     public static function log(string $type, string $description, ?int $userId = null, ?int $relatedId = null, ?string $relatedType = null, ?array $metadata = null)
     {
+        $request = request();
+        
         return self::create([
             'type' => $type,
             'description' => $description,
             'user_id' => $userId,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'request_method' => $request->method(),
+            'request_url' => $request->fullUrl(),
+            'session_id' => session()->getId(),
             'related_id' => $relatedId,
             'related_type' => $relatedType,
             'metadata' => $metadata

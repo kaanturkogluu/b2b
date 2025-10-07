@@ -29,6 +29,42 @@
                 <i class="fas fa-chart-line me-2"></i>
                 Raporlar
             </a>
+            <div class="nav-item">
+                <a class="nav-link @if(request()->routeIs('logs.*')) active @endif" 
+                   data-bs-toggle="collapse" 
+                   href="#logsMenu" 
+                   role="button" 
+                   aria-expanded="@if(request()->routeIs('logs.*')) true @else false @endif">
+                    <i class="fas fa-history me-2"></i>
+                    Sistem Logları
+                    <i class="fas fa-chevron-down float-end"></i>
+                </a>
+                <div class="collapse @if(request()->routeIs('logs.*')) show @endif" id="logsMenu">
+                    <ul class="nav flex-column ms-3">
+                        <li class="nav-item">
+                            <a class="nav-link @if(request()->routeIs('logs.activity')) active @endif" 
+                               href="{{ route('logs.activity') }}">
+                                <i class="fas fa-list me-2"></i>
+                                Aktivite Logları
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @if(request()->routeIs('logs.login')) active @endif" 
+                               href="{{ route('logs.login') }}">
+                                <i class="fas fa-sign-in-alt me-2"></i>
+                                Giriş Logları
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @if(request()->routeIs('logs.statistics')) active @endif" 
+                               href="{{ route('logs.statistics') }}">
+                                <i class="fas fa-chart-bar me-2"></i>
+                                İstatistikler
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
             <a class="nav-link @if(request()->routeIs('invoice-settings.*')) active @endif" href="{{ route('invoice-settings.index') }}">
                 <i class="fas fa-file-invoice me-2"></i>
                 Fatura Ayarları
@@ -38,6 +74,37 @@
 @endsection
 
 @section('additional-styles')
+    /* Log Menu Dropdown Styling */
+    #logsMenu .nav-link {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.8);
+    }
+    
+    #logsMenu .nav-link:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: white;
+    }
+    
+    #logsMenu .nav-link.active {
+        background-color: rgba(255, 255, 255, 0.15);
+        color: white;
+        font-weight: 500;
+    }
+    
+    .nav-item > .nav-link[data-bs-toggle="collapse"] {
+        cursor: pointer;
+    }
+    
+    .nav-item > .nav-link[data-bs-toggle="collapse"] .fa-chevron-down {
+        transition: transform 0.3s ease;
+        font-size: 0.8rem;
+    }
+    
+    .nav-item > .nav-link[data-bs-toggle="collapse"][aria-expanded="true"] .fa-chevron-down {
+        transform: rotate(180deg);
+    }
+    
     .stats-row .col-md-3 {
         margin-bottom: 1rem;
     }

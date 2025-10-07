@@ -17,124 +17,32 @@
                             </a>
                         </div>
                         <div class="card-body">
-                            <!-- Advanced Search and Filter -->
-                            <div class="card mb-4">
-                                <div class="card-header">
-                                    <h6 class="mb-0">
-                                        <i class="fas fa-filter me-2"></i>
-                                        Gelişmiş Filtreleme
-                                        <button class="btn btn-sm btn-outline-primary float-end" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse">
-                                            <i class="fas fa-chevron-down"></i>
-                                        </button>
-                                    </h6>
-                                </div>
-                                <div class="collapse" id="filterCollapse">
-                                    <div class="card-body">
-                                        <form method="GET" action="{{ route('bakim.index') }}" id="filterForm">
-                                            <div class="row g-3">
-                                                <!-- Arama -->
-                                                <div class="col-12 col-md-4">
-                                                    <label class="form-label">Arama</label>
-                                                    <input type="text" 
-                                                           name="search" 
-                                                           class="form-control" 
-                                                           placeholder="Plaka ara..." 
-                                                           value="{{ request('search') }}">
-                                                </div>
-                                                
-                                                <!-- Bakım Durumu -->
-                                                <div class="col-6 col-md-2">
-                                                    <label class="form-label">Bakım Durumu</label>
-                                                    <select name="bakim_durumu" class="form-select">
-                                                        @foreach($filterOptions['bakim_durumu_options'] as $value => $label)
-                                                            <option value="{{ $value }}" {{ request('bakim_durumu') == $value ? 'selected' : '' }}>
-                                                                {{ $label }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                                
-                                                <!-- Ödeme Durumu -->
-                                                <div class="col-6 col-md-2">
-                                                    <label class="form-label">Ödeme Durumu</label>
-                                                    <select name="odeme_durumu" class="form-select">
-                                                        @foreach($filterOptions['odeme_durumu_options'] as $value => $label)
-                                                            <option value="{{ $value }}" {{ request('odeme_durumu') == $value ? 'selected' : '' }}>
-                                                                {{ $label }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                                
-                                                <!-- Sıralama -->
-                                                <div class="col-6 col-md-2">
-                                                    <label class="form-label">Sıralama</label>
-                                                    <select name="sort_by" class="form-select">
-                                                        @foreach($filterOptions['sort_options'] as $value => $label)
-                                                            <option value="{{ $value }}" {{ request('sort_by') == $value ? 'selected' : '' }}>
-                                                                {{ $label }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                                
-                                                <!-- Tarih Aralığı -->
-                                                <div class="col-6 col-md-3">
-                                                    <label class="form-label">Başlangıç Tarihi</label>
-                                                    <input type="date" 
-                                                           name="start_date" 
-                                                           class="form-control" 
-                                                           value="{{ request('start_date') }}">
-                                                </div>
-                                                
-                                                <div class="col-6 col-md-3">
-                                                    <label class="form-label">Bitiş Tarihi</label>
-                                                    <input type="date" 
-                                                           name="end_date" 
-                                                           class="form-control" 
-                                                           value="{{ request('end_date') }}">
-                                                </div>
-                                                
-                                                <!-- Ücret Aralığı -->
-                                                <div class="col-6 col-md-3">
-                                                    <label class="form-label">Min. Ücret (₺)</label>
-                                                    <input type="number" 
-                                                           name="min_ucret" 
-                                                           class="form-control" 
-                                                           placeholder="0" 
-                                                           value="{{ request('min_ucret') }}">
-                                                </div>
-                                                
-                                                <div class="col-6 col-md-3">
-                                                    <label class="form-label">Max. Ücret (₺)</label>
-                                                    <input type="number" 
-                                                           name="max_ucret" 
-                                                           class="form-control" 
-                                                           placeholder="999999" 
-                                                           value="{{ request('max_ucret') }}">
-                                                </div>
-                                                
-                                                <!-- Butonlar -->
-                                                <div class="col-12">
-                                                    <div class="d-grid d-md-flex gap-2">
-                                                        <button type="submit" class="btn btn-primary">
-                                                            <i class="fas fa-search me-2"></i>
-                                                            Filtrele
-                                                        </button>
-                                                        <a href="{{ route('bakim.index') }}" class="btn btn-outline-secondary">
-                                                            <i class="fas fa-refresh me-2"></i>
-                                                            Temizle
-                                                        </a>
-                                                        <button type="button" class="btn btn-outline-info" onclick="exportToExcel()">
-                                                            <i class="fas fa-file-excel me-2"></i>
-                                                            Excel'e Aktar
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </form>
+                            <!-- Plaka Arama -->
+                            <div class="mb-4">
+                                <form method="GET" action="{{ route('bakim.index') }}" class="row g-3">
+                                    <div class="col-12 col-md-10">
+                                        <input type="text" 
+                                               name="search" 
+                                               class="form-control form-control-lg" 
+                                               placeholder="Plaka ile ara..." 
+                                               value="{{ request('search') }}"
+                                               autofocus>
                                     </div>
-                                </div>
+                                    <div class="col-12 col-md-2">
+                                        <button type="submit" class="btn btn-primary btn-lg w-100">
+                                            <i class="fas fa-search me-2"></i>
+                                            Ara
+                                        </button>
+                                    </div>
+                                    @if(request('search'))
+                                        <div class="col-12">
+                                            <a href="{{ route('bakim.index') }}" class="btn btn-outline-secondary">
+                                                <i class="fas fa-times me-2"></i>
+                                                Aramayı Temizle
+                                            </a>
+                                        </div>
+                                    @endif
+                                </form>
                             </div>
 
                             <!-- Services Table - Desktop -->
@@ -376,9 +284,6 @@
                             @endif
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
 @endsection
 
 @section('additional-scripts')
@@ -387,33 +292,6 @@
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
         var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl);
-        });
-        
-        // Export to Excel function
-        function exportToExcel() {
-            const form = document.getElementById('filterForm');
-            const formData = new FormData(form);
-            const params = new URLSearchParams(formData);
-            
-            window.open('{{ route("bakim.export.excel") }}?' + params.toString(), '_blank');
-        }
-        
-        // Initialize tooltips and other features
-        document.addEventListener('DOMContentLoaded', function() {
-            // Lazy loading for images
-            const images = document.querySelectorAll('img[data-src]');
-            const imageObserver = new IntersectionObserver((entries, observer) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        const img = entry.target;
-                        img.src = img.dataset.src;
-                        img.classList.remove('lazy');
-                        imageObserver.unobserve(img);
-                    }
-                });
-            });
-            
-            images.forEach(img => imageObserver.observe(img));
         });
     </script>
 @endsection

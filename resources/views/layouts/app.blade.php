@@ -15,32 +15,28 @@
             background: @yield('sidebar-gradient', 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)');
             min-height: 100vh;
             color: white;
-            position: fixed;
-            top: 0;
-            left: -280px;
-            width: 280px;
-            z-index: 1050;
-            transition: left 0.3s ease;
-            overflow-y: auto;
         }
-        .sidebar.show {
-            left: 0;
+        
+        /* Sidebar içeriği her zaman beyaz */
+        .sidebar * {
+            color: white !important;
         }
+        
         .sidebar .nav-link {
-            color: rgba(255, 255, 255, 0.8);
+            color: rgba(255, 255, 255, 0.8) !important;
             padding: 12px 20px;
             border-radius: 8px;
             margin: 5px 15px;
             transition: all 0.3s ease;
-            white-space: nowrap;
+            text-decoration: none;
         }
         .sidebar .nav-link:hover {
             background-color: rgba(255, 255, 255, 0.1);
-            color: white;
+            color: white !important;
         }
         .sidebar .nav-link.active {
             background-color: rgba(255, 255, 255, 0.2);
-            color: white;
+            color: white !important;
         }
         .main-content {
             padding: 1rem;
@@ -78,26 +74,35 @@
         }
         @media (min-width: 768px) {
             .sidebar {
-                position: relative;
-                left: 0;
-                width: auto;
-                min-height: 100vh;
-                z-index: auto;
+                position: sticky;
+                top: 0;
+                height: 100vh;
+                overflow-y: auto;
             }
             .main-content {
-                margin-left: 0;
                 padding: 2rem;
+                min-height: 100vh;
             }
             .mobile-header {
                 display: none;
             }
-            .overlay {
+            .sidebar-overlay {
                 display: none !important;
             }
         }
         @media (max-width: 767px) {
             .sidebar {
+                position: fixed;
+                top: 0;
+                left: -280px;
                 width: 280px;
+                height: 100vh;
+                z-index: 1050;
+                transition: left 0.3s ease;
+                overflow-y: auto;
+            }
+            .sidebar.show {
+                left: 0;
             }
             .main-content {
                 padding: 0.5rem;
@@ -300,8 +305,8 @@
     <!-- Sidebar Overlay -->
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
-    <div class="container-fluid">
-        <div class="row">
+    <div class="container-fluid p-0">
+        <div class="row g-0">
             <!-- Sidebar -->
             <div class="col-md-3 col-lg-2 sidebar" id="sidebar">
                 <div class="p-3">
