@@ -235,6 +235,15 @@ class BakimController extends Controller
                 }
             }
 
+            // Parçalar eklendikten sonra ucret alanını parçalardan otomatik hesapla
+            $bakim->refresh();
+            $parcaToplami = $bakim->degisecekParcalar->sum(function($parca) {
+                return $parca->adet * $parca->birim_fiyat;
+            });
+            
+            // ucret alanını parça toplamı ile güncelle
+            $bakim->update(['ucret' => $parcaToplami]);
+
             // Activity log
             ActivityLog::log(
                 'bakim_created',
@@ -392,6 +401,14 @@ class BakimController extends Controller
                 $bakim->degisecekParcalar()->delete();
             }
 
+            // Parçalar güncellendikten sonra ucret alanını parçalardan otomatik hesapla
+            $bakim->refresh();
+            $parcaToplami = $bakim->degisecekParcalar->sum(function($parca) {
+                return $parca->adet * $parca->birim_fiyat;
+            });
+            
+            // ucret alanını parça toplamı ile güncelle
+            $bakim->update(['ucret' => $parcaToplami]);
 
             DB::commit();
             return redirect()->route('bakim.index')->with('success', 'Bakım kaydı başarıyla güncellendi.');

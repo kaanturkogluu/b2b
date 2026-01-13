@@ -348,10 +348,14 @@
                                                 </td>
                                                 <td>
                                                     <div class="text-center">
-                                                        <strong>{{ number_format(($bakim->ucret ?? 0) + ($bakim->iscilik_ucreti ?? 0), 2) }} ₺</strong>
+                                                        @php
+                                                            $parcaToplami = $bakim->degisecekParcalar->sum(function($parca) { return $parca->adet * $parca->birim_fiyat; });
+                                                            $genelToplam = $parcaToplami + ($bakim->iscilik_ucreti ?? 0);
+                                                        @endphp
+                                                        <strong>{{ number_format($genelToplam, 2) }} ₺</strong>
                                                         @if($bakim->iscilik_ucreti > 0)
                                                             <br><small class="text-muted">
-                                                                Parça: {{ number_format($bakim->ucret ?? 0, 2) }} ₺<br>
+                                                                Parça: {{ number_format($parcaToplami, 2) }} ₺<br>
                                                                 İşçilik: {{ number_format($bakim->iscilik_ucreti ?? 0, 2) }} ₺
                                                             </small>
                                                         @endif

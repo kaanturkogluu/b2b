@@ -194,7 +194,16 @@
                                                     <i class="fas fa-money-bill me-2"></i>
                                                     Ücret Bilgileri
                                                 </h6>
-                                                <p class="mb-0"><strong>Toplam Ücret:</strong> {{ number_format($bakim->ucret, 2) }} ₺</p>
+                                                @php
+                                                    $parcaToplami = $bakim->degisecekParcalar->sum(function($parca) { return $parca->adet * $parca->birim_fiyat; });
+                                                    $genelToplam = $parcaToplami + ($bakim->iscilik_ucreti ?? 0);
+                                                @endphp
+                                                <p class="mb-0"><strong>Toplam Ücret:</strong> {{ number_format($genelToplam, 2) }} ₺</p>
+                                                @if($bakim->iscilik_ucreti > 0)
+                                                    <small class="text-muted">
+                                                        (Parça: {{ number_format($parcaToplami, 2) }} ₺ + İşçilik: {{ number_format($bakim->iscilik_ucreti ?? 0, 2) }} ₺)
+                                                    </small>
+                                                @endif
                                             </div>
                                         </div>
                                     </div>

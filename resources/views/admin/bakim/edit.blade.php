@@ -388,7 +388,11 @@
                                             <hr class="my-2">
                                             <div class="d-flex justify-content-between">
                                                 <strong>Toplam:</strong>
-                                                <strong id="toplam_ucret_display">{{ number_format(($bakim->ucret ?? 0) + ($bakim->iscilik_ucreti ?? 0), 2) }} ₺</strong>
+                                                @php
+                                                    $parcaToplami = $bakim->degisecekParcalar->sum(function($parca) { return $parca->adet * $parca->birim_fiyat; });
+                                                    $genelToplam = $parcaToplami + ($bakim->iscilik_ucreti ?? 0);
+                                                @endphp
+                                                <strong id="toplam_ucret_display">{{ number_format($genelToplam, 2) }} ₺</strong>
                                             </div>
                                         </div>
                                     </div>

@@ -78,7 +78,7 @@ class ReportsController extends Controller
         $startDate = $request->get('start_date', Carbon::now()->startOfMonth()->format('Y-m-d'));
         $endDate = $request->get('end_date', Carbon::now()->endOfMonth()->format('Y-m-d'));
 
-        $bakimlar = Bakim::with(['admin', 'personel'])
+        $bakimlar = Bakim::with(['admin', 'personel', 'degisecekParcalar'])
             ->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
             ->get();
 
@@ -120,12 +120,18 @@ class ReportsController extends Controller
     private function calculateStats($bakimlar)
     {
         $totalRevenue = $bakimlar->sum(function($bakim) {
-            return ($bakim->ucret ?? 0) + ($bakim->iscilik_ucreti ?? 0);
+            $parcaToplami = $bakim->degisecekParcalar->sum(function($parca) {
+                return $parca->adet * $parca->birim_fiyat;
+            });
+            return $parcaToplami + ($bakim->iscilik_ucreti ?? 0);
         });
         
         $avgServiceValue = $bakimlar->count() > 0 ? 
             $bakimlar->avg(function($bakim) {
-                return ($bakim->ucret ?? 0) + ($bakim->iscilik_ucreti ?? 0);
+                $parcaToplami = $bakim->degisecekParcalar->sum(function($parca) {
+                    return $parca->adet * $parca->birim_fiyat;
+                });
+                return $parcaToplami + ($bakim->iscilik_ucreti ?? 0);
             }) : 0;
 
         return [
@@ -149,19 +155,31 @@ class ReportsController extends Controller
     private function calculateFinancialStats($bakimlar)
     {
         $totalRevenue = $bakimlar->sum(function($bakim) {
-            return ($bakim->ucret ?? 0) + ($bakim->iscilik_ucreti ?? 0);
+            $parcaToplami = $bakim->degisecekParcalar->sum(function($parca) {
+                return $parca->adet * $parca->birim_fiyat;
+            });
+            return $parcaToplami + ($bakim->iscilik_ucreti ?? 0);
         });
         
         $paidRevenue = $bakimlar->where('odeme_durumu', 1)->sum(function($bakim) {
-            return ($bakim->ucret ?? 0) + ($bakim->iscilik_ucreti ?? 0);
+            $parcaToplami = $bakim->degisecekParcalar->sum(function($parca) {
+                return $parca->adet * $parca->birim_fiyat;
+            });
+            return $parcaToplami + ($bakim->iscilik_ucreti ?? 0);
         });
         
         $unpaidRevenue = $bakimlar->where('odeme_durumu', 0)->sum(function($bakim) {
-            return ($bakim->ucret ?? 0) + ($bakim->iscilik_ucreti ?? 0);
+            $parcaToplami = $bakim->degisecekParcalar->sum(function($parca) {
+                return $parca->adet * $parca->birim_fiyat;
+            });
+            return $parcaToplami + ($bakim->iscilik_ucreti ?? 0);
         });
 
         $serviceValues = $bakimlar->map(function($bakim) {
-            return ($bakim->ucret ?? 0) + ($bakim->iscilik_ucreti ?? 0);
+            $parcaToplami = $bakim->degisecekParcalar->sum(function($parca) {
+                return $parca->adet * $parca->birim_fiyat;
+            });
+            return $parcaToplami + ($bakim->iscilik_ucreti ?? 0);
         });
 
         return [
@@ -187,7 +205,10 @@ class ReportsController extends Controller
             return [
                 'count' => $group->count(),
                 'revenue' => $group->sum(function($bakim) {
-                    return ($bakim->ucret ?? 0) + ($bakim->iscilik_ucreti ?? 0);
+                    $parcaToplami = $bakim->degisecekParcalar->sum(function($parca) {
+                        return $parca->adet * $parca->birim_fiyat;
+                    });
+                    return $parcaToplami + ($bakim->iscilik_ucreti ?? 0);
                 })
             ];
         });

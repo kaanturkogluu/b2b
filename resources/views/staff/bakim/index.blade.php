@@ -366,7 +366,11 @@
                                                     @endif
                                                 </td>
                                                 <td>
-                                                    <strong>{{ number_format($bakim->ucret, 2) }} ₺</strong>
+                                                    @php
+                                                        $parcaToplami = $bakim->degisecekParcalar->sum(function($parca) { return $parca->adet * $parca->birim_fiyat; });
+                                                        $genelToplam = $parcaToplami + ($bakim->iscilik_ucreti ?? 0);
+                                                    @endphp
+                                                    <strong>{{ number_format($genelToplam, 2) }} ₺</strong>
                                                 </td>
                                                 <td>{{ $bakim->bakim_tarihi->format('d.m.Y') }}</td>
                                                 <td>
