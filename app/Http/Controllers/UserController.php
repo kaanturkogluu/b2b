@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\ActivityLog;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
@@ -32,7 +33,7 @@ class UserController extends Controller
             $query->where('role', $request->role);
         }
 
-        $users = $query->orderBy('created_at', 'desc')->paginate(10);
+        $users = $query->orderBy('created_at', 'desc')->paginate(20);
         
         return view('admin.users.index', compact('users'));
     }
@@ -73,31 +74,37 @@ class UserController extends Controller
             'role.in' => 'Geçersiz rol seçimi.',
         ]);
 
-        $user = User::create([
-            'name' => $request->name,
-            'username' => $request->username,
-            'email' => $request->filled('email') ? $request->email : null,
-            'password' => Hash::make($request->password),
-            'role' => $request->role,
-        ]);
+        DB::beginTransaction();
+        try {
+            $user = User::create([
+                'name' => $request->name,
+                'username' => $request->username,
+                'email' => $request->filled('email') ? $request->email : null,
+                'password' => Hash::make($request->password),
+                'role' => $request->role,
+            ]);
 
-        // Activity log
-        ActivityLog::log(
-            'user_created',
-            "Yeni kullanıcı oluşturuldu: {$user->name} ({$user->role})",
-            Auth::id(),
-            $user->id,
-            'App\Models\User',
-            [
-                'name' => $user->name,
-                'username' => $user->username,
-                'role' => $user->role
-            ]
-        );
+            // Activity log
+            ActivityLog::log(
+                'user_created',
+                "Yeni kullanıcı oluşturuldu: {$user->name} ({$user->role})",
+                Auth::id(),
+                $user->id,
+                'App\Models\User',
+                [
+                    'name' => $user->name,
+                    'username' => $user->username,
+                    'role' => $user->role
+                ]
+            );
 
-
-        return redirect()->route('users.index')
-            ->with('success', 'Kullanıcı başarıyla oluşturuldu.');
+            DB::commit();
+            return redirect()->route('users.index')
+                ->with('success', 'Kullanıcı başarıyla oluşturuldu.');
+        } catch (\Exception $e) {
+            DB::rollback();
+            return back()->withInput()->with('error', 'Kullanıcı oluşturulurken bir hata oluştu: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -143,23 +150,43 @@ class UserController extends Controller
             'role.in' => 'Geçersiz rol seçimi.',
         ]);
 
-        $updateData = [
-            'name' => $request->name,
-            'username' => $request->username,
-            'email' => $request->filled('email') ? $request->email : null,
-            'role' => $request->role,
-        ];
+        DB::beginTransaction();
+        try {
+            $updateData = [
+                'name' => $request->name,
+                'username' => $request->username,
+                'email' => $request->filled('email') ? $request->email : null,
+                'role' => $request->role,
+            ];
 
-        // Only update password if provided
-        if ($request->filled('password')) {
-            $updateData['password'] = Hash::make($request->password);
+            // Only update password if provided
+            if ($request->filled('password')) {
+                $updateData['password'] = Hash::make($request->password);
+            }
+
+            $user->update($updateData);
+
+            // Activity log
+            ActivityLog::log(
+                'user_updated',
+                "Kullanıcı güncellendi: {$user->name} ({$user->username})",
+                Auth::id(),
+                $user->id,
+                'App\Models\User',
+                [
+                    'name' => $user->name,
+                    'username' => $user->username,
+                    'role' => $user->role
+                ]
+            );
+
+            DB::commit();
+            return redirect()->route('users.index')
+                ->with('success', 'Kullanıcı başarıyla güncellendi.');
+        } catch (\Exception $e) {
+            DB::rollback();
+            return back()->withInput()->with('error', 'Kullanıcı güncellenirken bir hata oluştu: ' . $e->getMessage());
         }
-
-        $user->update($updateData);
-
-
-        return redirect()->route('users.index')
-            ->with('success', 'Kullanıcı başarıyla güncellendi.');
     }
 
     /**
@@ -173,31 +200,38 @@ class UserController extends Controller
                 ->with('error', 'Kendi hesabınızı silemezsiniz.');
         }
 
-        // Store user data before deletion for activity log
-        $userData = [
-            'name' => $user->name,
-            'username' => $user->username,
-            'email' => $user->email,
-            'role' => $user->role,
-            'is_active' => $user->is_active,
-            'created_at' => $user->created_at?->format('Y-m-d H:i:s')
-        ];
+        DB::beginTransaction();
+        try {
+            // Store user data before deletion for activity log
+            $userData = [
+                'name' => $user->name,
+                'username' => $user->username,
+                'email' => $user->email,
+                'role' => $user->role,
+                'is_active' => $user->is_active,
+                'created_at' => $user->created_at?->format('Y-m-d H:i:s')
+            ];
 
-        $user->delete();
+            $user->delete();
 
-        // Activity log
-        ActivityLog::log(
-            'user_deleted',
-            "Kullanıcı silindi: {$userData['name']} ({$userData['username']}) - {$userData['role']}",
-            Auth::id(),
-            null, // related_id is null since record is deleted
-            'App\Models\User',
-            $userData
-        );
+            // Activity log
+            ActivityLog::log(
+                'user_deleted',
+                "Kullanıcı silindi: {$userData['name']} ({$userData['username']}) - {$userData['role']}",
+                Auth::id(),
+                null, // related_id is null since record is deleted
+                'App\Models\User',
+                $userData
+            );
 
-
-        return redirect()->route('users.index')
-            ->with('success', 'Kullanıcı başarıyla silindi.');
+            DB::commit();
+            return redirect()->route('users.index')
+                ->with('success', 'Kullanıcı başarıyla silindi.');
+        } catch (\Exception $e) {
+            DB::rollback();
+            return redirect()->route('users.index')
+                ->with('error', 'Kullanıcı silinirken bir hata oluştu: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -211,15 +245,35 @@ class UserController extends Controller
                 ->with('error', 'Kendi hesabınızı deaktive edemezsiniz.');
         }
 
-        $user->update([
-            'is_active' => !$user->is_active
-        ]);
+        DB::beginTransaction();
+        try {
+            $user->update([
+                'is_active' => !$user->is_active
+            ]);
 
+            // Activity log
+            $status = $user->is_active ? 'aktif' : 'pasif';
+            ActivityLog::log(
+                'user_status_toggled',
+                "Kullanıcı durumu değiştirildi: {$user->name} ({$user->username}) - {$status}",
+                Auth::id(),
+                $user->id,
+                'App\Models\User',
+                [
+                    'name' => $user->name,
+                    'username' => $user->username,
+                    'new_status' => $status
+                ]
+            );
 
-        $status = $user->is_active ? 'aktif' : 'pasif';
-        
-        return redirect()->route('users.index')
-            ->with('success', "Kullanıcı {$status} hale getirildi.");
+            DB::commit();
+            return redirect()->route('users.index')
+                ->with('success', "Kullanıcı {$status} hale getirildi.");
+        } catch (\Exception $e) {
+            DB::rollback();
+            return redirect()->route('users.index')
+                ->with('error', 'Kullanıcı durumu değiştirilirken bir hata oluştu: ' . $e->getMessage());
+        }
     }
 
 }

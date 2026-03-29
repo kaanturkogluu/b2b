@@ -1,63 +1,11 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Raporlar - Motojet Servis</title>
-    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        body {
-            background-color: #f8f9fa;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        .sidebar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            color: white;
-        }
-        
-        .sidebar .nav-link {
-            color: rgba(255, 255, 255, 0.8);
-            padding: 12px 20px;
-            border-radius: 8px;
-            margin: 5px 0;
-            transition: all 0.3s ease;
-        }
-        
-        .sidebar .nav-link:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-            color: white;
-        }
-        
-        .sidebar .nav-link.active {
-            background-color: rgba(255, 255, 255, 0.2);
-            color: white;
-        }
-        
-        .main-content {
-            padding: 0;
-            background-color: #f8f9fa;
-        }
-        
-        .header {
-            background: white;
-            padding: 20px 30px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            border-bottom: 1px solid #e9ecef;
-        }
-        
+@extends('layouts.admin')
+
+@section('page-title', 'Raporlar')
+@section('page-subtitle', 'Sistem raporlarını görüntüleyin')
+
+@section('additional-styles')
         .content {
             padding: 30px;
-        }
-        
-        .card {
-            border: none;
-            border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
         }
         
         .card-header {
@@ -148,68 +96,9 @@
             background-color: #28a745;
             color: white;
         }
-    </style>
-</head>
-<body>
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Sidebar -->
-            <div class="col-md-3 col-lg-2 sidebar">
-                <div class="p-3">
-                    <h4 class="text-center mb-4">
-                        <i class="fas fa-motorcycle me-2"></i>
-                        MotoJet Servis
-                    </h4>
-                    <nav class="nav flex-column">
-                        <a class="nav-link" href="{{ route('dashboard') }}">
-                            <i class="fas fa-tachometer-alt me-2"></i>
-                            Dashboard
-                        </a>
-                        <a class="nav-link" href="{{ route('bakim.index') }}">
-                            <i class="fas fa-tools me-2"></i>
-                            Servis Yönetimi
-                        </a>
-                        
-                        @auth
-                            @if(auth()->user()->role === 'admin')
-                                <a class="nav-link" href="{{ route('users.index') }}">
-                                    <i class="fas fa-users me-2"></i>
-                                    Kullanıcı Yönetimi
-                                </a>
-                                <a class="nav-link active" href="{{ route('reports.index') }}">
-                                    <i class="fas fa-chart-line me-2"></i>
-                                    Raporlar
-                                </a>
-                                <a class="nav-link" href="{{ route('invoice-settings.index') }}">
-                                    <i class="fas fa-file-invoice me-2"></i>
-                                    Fatura Ayarları
-                                </a>
-                            @elseif(auth()->user()->role === 'staff')
-                                <a class="nav-link" href="{{ route('staff.bakim.index') }}">
-                                    <i class="fas fa-list me-2"></i>
-                                    Servislerim
-                                </a>
-                            @endif
-                        @endauth
-                    </nav>
-                </div>
-            </div>
+@endsection
 
-            <!-- Main Content -->
-            <div class="col-md-9 col-lg-10">
-                <div class="main-content">
-                    <div class="header">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h2 class="mb-0">Raporlar</h2>
-                                <p class="text-muted mb-0">Servis istatistikleri ve analizler</p>
-                            </div>
-                            <div class="d-flex align-items-center gap-2">
-                                <span class="badge bg-primary">Admin</span>
-                            </div>
-                        </div>
-                    </div>
-
+@section('content')
                     <div class="content">
                 <!-- Filter Card -->
                 <div class="filter-card">
@@ -358,7 +247,10 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+@endsection
+
+@section('additional-scripts')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         function showUpgradeAlert(reportType) {
             Swal.fire({
@@ -381,6 +273,4 @@
             });
         }
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-</body>
-</html>
+@endsection

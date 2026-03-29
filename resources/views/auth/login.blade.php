@@ -22,6 +22,12 @@
             overflow: hidden;
             max-width: 400px;
             width: 100%;
+            margin: 1rem;
+        }
+        @media (min-width: 768px) {
+            .login-card {
+                margin: 0;
+            }
         }
         .login-header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);

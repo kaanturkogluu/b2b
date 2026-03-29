@@ -184,7 +184,7 @@
                                         <input type="text" 
                                                name="search" 
                                                class="form-control me-2" 
-                                               placeholder="Plaka, müşteri adı ara..." 
+                                               placeholder="Plaka ara..." 
                                                value="{{ request('search') }}">
                                         <button type="submit" class="btn btn-outline-primary">
                                             <i class="fas fa-search"></i>

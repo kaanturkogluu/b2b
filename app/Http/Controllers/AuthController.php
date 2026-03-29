@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 use App\Models\User;
 use App\Models\ActivityLog;
+use App\Models\LoginLog;
 
 class AuthController extends Controller
 {
@@ -50,18 +52,64 @@ class AuthController extends Controller
         ];
 
         if (Auth::attempt($credentials, $request->filled('remember'))) {
-            $request->session()->regenerate();
-            
-            $user = Auth::user();
-            
-            // Kullanıcı tipine göre uygun dashboard'a yönlendir
-            if ($user->isAdmin()) {
-                return redirect()->intended(route('dashboard'));
-            } elseif ($user->isStaff()) {
-                return redirect()->intended(route('staff.dashboard'));
-            } else {
-                return redirect()->intended(route('dashboard'));
+            DB::beginTransaction();
+            try {
+                $request->session()->regenerate();
+                
+                $user = Auth::user();
+                
+                // Başarılı giriş logla
+                LoginLog::logLogin(
+                    $user->id,
+                    $user->username,
+                    $request->ip(),
+                    $request->userAgent(),
+                    true
+                );
+                
+                // Activity log
+                ActivityLog::log(
+                    'user_login',
+                    "Kullanıcı giriş yaptı: {$user->name} ({$user->username}) - {$user->role}",
+                    $user->id,
+                    $user->id,
+                    'App\Models\User'
+                );
+                
+                DB::commit();
+                
+                // Kullanıcı tipine göre uygun dashboard'a yönlendir
+                if ($user->isAdmin()) {
+                    return redirect()->intended(route('dashboard'));
+                } elseif ($user->isStaff()) {
+                    return redirect()->intended(route('staff.dashboard'));
+                } else {
+                    return redirect()->intended(route('dashboard'));
+                }
+            } catch (\Exception $e) {
+                DB::rollback();
+                Auth::logout();
+                return back()->withErrors([
+                    'username' => 'Giriş sırasında bir hata oluştu. Lütfen tekrar deneyin.',
+                ])->onlyInput('username');
             }
+        }
+
+        // Başarısız giriş denemesi logla
+        DB::beginTransaction();
+        try {
+            LoginLog::logLogin(
+                null,
+                $request->username,
+                $request->ip(),
+                $request->userAgent(),
+                false,
+                'Kullanıcı adı veya şifre hatalı'
+            );
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollback();
+            // Loglama hatası kullanıcıyı engellememeli, devam et
         }
 
         return back()->withErrors([
@@ -74,6 +122,35 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
+        $user = Auth::user();
+        
+        if ($user) {
+            DB::beginTransaction();
+            try {
+                // Çıkış logla
+                LoginLog::logLogout(
+                    $user->id,
+                    $user->username,
+                    $request->ip(),
+                    $request->userAgent()
+                );
+                
+                // Activity log
+                ActivityLog::log(
+                    'user_logout',
+                    "Kullanıcı çıkış yaptı: {$user->name} ({$user->username})",
+                    $user->id,
+                    $user->id,
+                    'App\Models\User'
+                );
+                
+                DB::commit();
+            } catch (\Exception $e) {
+                DB::rollback();
+                // Loglama hatası çıkışı engellemez
+            }
+        }
+        
         Auth::logout();
         
         $request->session()->invalidate();

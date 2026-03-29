@@ -14,7 +14,9 @@ class DegisecekParca extends Model
         'parca_adi',
         'adet',
         'birim_fiyat',
-        'aciklama'
+        'aciklama',
+        'is_deleted',
+        'deleted_at'
     ];
 
     protected $casts = [
@@ -30,5 +32,21 @@ class DegisecekParca extends Model
     public function getToplamFiyatAttribute()
     {
         return $this->adet * $this->birim_fiyat;
+    }
+
+    /**
+     * Scope: Sadece silinmemiş parçaları getir
+     */
+    public function scopeNotDeleted($query)
+    {
+        return $query->where('is_deleted', false);
+    }
+
+    /**
+     * Scope: Sadece silinmiş parçaları getir
+     */
+    public function scopeOnlyDeleted($query)
+    {
+        return $query->where('is_deleted', true);
     }
 }

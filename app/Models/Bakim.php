@@ -29,7 +29,10 @@ class Bakim extends Model
         'personel_id',
         'tamamlayan_personel_id',
         'tamamlanma_tarihi',
-        'tamamlanma_notu'
+        'tamamlanma_notu',
+        'is_deleted',
+        'deleted_at',
+        'deleted_by'
     ];
 
     protected $casts = [
@@ -59,5 +62,62 @@ class Bakim extends Model
     public function degisecekParcalar(): HasMany
     {
         return $this->hasMany(DegisecekParca::class, 'bakim_id');
+    }
+
+    public function deletedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'deleted_by');
+    }
+
+    /**
+     * Scope: Sadece silinmemiş kayıtları getir
+     */
+    public function scopeNotDeleted($query)
+    {
+        return $query->where('is_deleted', false);
+    }
+
+    /**
+     * Scope: Sadece silinmiş kayıtları getir
+     */
+    public function scopeOnlyDeleted($query)
+    {
+        return $query->where('is_deleted', true);
+    }
+
+    /**
+     * Soft delete işlemi
+     */
+    public function softDelete($userId = null)
+    {
+        $this->update([
+            'is_deleted' => true,
+            'deleted_at' => now(),
+            'deleted_by' => $userId
+        ]);
+
+        // Parçaları da soft delete yap
+        $this->degisecekParcalar()->update([
+            'is_deleted' => true,
+            'deleted_at' => now()
+        ]);
+    }
+
+    /**
+     * Soft delete'i geri al
+     */
+    public function restore()
+    {
+        $this->update([
+            'is_deleted' => false,
+            'deleted_at' => null,
+            'deleted_by' => null
+        ]);
+
+        // Parçaları da geri yükle
+        $this->degisecekParcalar()->update([
+            'is_deleted' => false,
+            'deleted_at' => null
+        ]);
     }
 }
